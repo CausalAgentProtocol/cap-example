@@ -11,7 +11,6 @@ If you are new to CAP, start with the [`cap` repository](https://github.com/Caus
 - [`cap`](https://github.com/CausalAgentProtocol/cap): learn CAP and read the authoritative protocol docs
 - [`python-sdk`](https://github.com/CausalAgentProtocol/python-sdk): build CAP clients and CAP-compatible Python services
 - `cap-example`: inspect a neutral, synthetic CAP server that demonstrates the protocol boundary
-- `abel-cap-server`: inspect a production-shaped Abel implementation that applies CAP to a real runtime
 
 ## What This Repository Demonstrates
 
