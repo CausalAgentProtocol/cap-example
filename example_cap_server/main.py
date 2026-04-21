@@ -62,7 +62,11 @@ from cap.server import (
 )
 
 from example_cap_server import __version__
+from example_cap_server import market_interpretation
+from example_cap_server import runtime_config
 from example_cap_server import toy_graph
+from example_cap_server.integrations import get_cap_function_plan
+from example_cap_server.market_pipeline.parser import parse_cap_request
 
 
 @dataclass(frozen=True)
@@ -191,6 +195,507 @@ class DatasetProfileResponse(BaseModel):
     result: DatasetProfileResult
 
 
+class DatasetDensityRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.example.dataset_density"
+
+
+class DatasetDensityResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    graph_id: str
+    graph_version: str
+    synthetic: bool
+    node_count: int
+    edge_count: int
+    possible_directed_edges: int
+    missing_directed_edges: int
+    density: float
+    sparsity: float
+    average_degree: float
+    average_in_degree: float
+    average_out_degree: float
+    max_degree: int
+    min_degree: int
+    max_in_degree: int
+    min_in_degree: int
+    max_out_degree: int
+    min_out_degree: int
+    source_node_count: int
+    sink_node_count: int
+    isolated_node_count: int
+
+
+class DatasetDensityResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: DatasetDensityResult
+
+
+class ConnectivityReportParams(BaseModel):
+    source_node_id: str
+    target_node_id: str
+    max_paths: int = 20
+
+
+class ConnectivityReportRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.example.connectivity_report"
+    params: ConnectivityReportParams
+
+
+class ConnectivityReportResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_node_id: str
+    target_node_id: str
+    source_known: bool
+    target_known: bool
+    connected: bool
+    path_count: int
+    max_paths: int
+    truncated: bool
+    shortest_path: list[str] | None
+    shortest_path_length: int | None
+    longest_path: list[str] | None
+    longest_path_length: int | None
+    all_paths: list[list[str]]
+    missing_nodes: list[str]
+
+
+class ConnectivityReportResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: ConnectivityReportResult
+
+
+class PathContributionReportParams(BaseModel):
+    source_node_id: str
+    target_node_id: str
+    max_paths: int = 20
+
+
+class PathContributionReportRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.example.path_contribution_report"
+    params: PathContributionReportParams
+
+
+class PathContributionEdge(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    from_node_id: str
+    to_node_id: str
+    weight: float
+
+
+class PathContributionItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    rank: int
+    node_ids: list[str]
+    edge_count: int
+    edges: list[PathContributionEdge]
+    path_effect: float
+    abs_path_effect: float
+    share_of_total_effect: float | None
+    share_of_total_absolute_effect: float | None
+
+
+class PathContributionReportResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_node_id: str
+    target_node_id: str
+    source_known: bool
+    target_known: bool
+    connected: bool
+    path_count: int
+    max_paths: int
+    truncated: bool
+    total_effect: float
+    total_absolute_effect: float
+    top_contributing_path: list[str] | None
+    top_contributing_path_effect: float | None
+    paths: list[PathContributionItem]
+    missing_nodes: list[str]
+
+
+class PathContributionReportResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: PathContributionReportResult
+
+
+class MarketImpactParams(BaseModel):
+    target_node: str
+    intervention_delta: float = 1.0
+    min_effect_threshold: float = 0.0001
+
+
+class MarketImpactRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.example.market_impact"
+    params: MarketImpactParams
+
+
+class MarketImpactNodeChange(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    node_id: str
+    delta: float
+    abs_delta: float
+    baseline: float
+    relative_change: float | None
+
+
+class MarketImpactResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    target_node: str
+    target_known: bool
+    intervention_delta: float
+    min_effect_threshold: float
+    node_count: int
+    affected_node_count: int
+    downstream_affected_node_count: int
+    unaffected_node_count: int
+    total_absolute_change: float
+    average_absolute_change: float
+    market_change_level: float
+    max_affected_node: str | None
+    max_affected_change: float | None
+    max_affected_change_abs: float | None
+    affected_nodes: list[MarketImpactNodeChange]
+    missing_nodes: list[str]
+
+
+class MarketImpactResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: MarketImpactResult
+
+
+class NodeSystemicRiskParams(BaseModel):
+    node_id: str
+    stress_delta: float = 1.0
+    min_effect_threshold: float = 0.0001
+
+
+class NodeSystemicRiskRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.example.node_systemic_risk"
+    params: NodeSystemicRiskParams
+
+
+class NodeSystemicRiskResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    node_id: str
+    node_known: bool
+    stress_delta: float
+    min_effect_threshold: float
+    node_count: int
+    in_degree: int
+    out_degree: int
+    degree: int
+    downstream_reachable_count: int
+    downstream_reach_ratio: float
+    affected_node_count: int
+    downstream_affected_node_count: int
+    unaffected_node_count: int
+    total_absolute_change: float
+    average_absolute_change: float
+    market_change_level: float
+    max_affected_node: str | None
+    max_affected_change: float | None
+    max_affected_change_abs: float | None
+    impact_intensity: float
+    propagation_breadth: float
+    concentration_risk: float
+    structural_centrality: float
+    systemic_risk_score: float
+    systemic_risk_level: str
+    affected_nodes: list[MarketImpactNodeChange]
+    missing_nodes: list[str]
+
+
+class NodeSystemicRiskResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: NodeSystemicRiskResult
+
+
+class MultiInterventionInput(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    target_node: str
+    intervention_delta: float = 1.0
+
+
+class MultiInterventionImpactParams(BaseModel):
+    interventions: list[MultiInterventionInput] = Field(min_length=1)
+    min_effect_threshold: float = 0.0001
+
+
+class MultiInterventionImpactRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.example.multi_intervention_impact"
+    params: MultiInterventionImpactParams
+
+
+class MultiInterventionInterventionItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    target_node: str
+    target_known: bool
+    intervention_delta: float
+
+
+class MultiInterventionSummaryItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    target_node: str
+    target_known: bool
+    intervention_delta: float
+    affected_node_count: int
+    market_change_level: float
+    total_absolute_change: float
+    max_affected_node: str | None
+    max_affected_change_abs: float | None
+
+
+class MultiInterventionNodeChange(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    node_id: str
+    delta: float
+    abs_delta: float
+    baseline: float
+    relative_change: float | None
+
+
+class MultiInterventionImpactResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    intervention_count: int
+    evaluated_intervention_count: int
+    interventions: list[MultiInterventionInterventionItem]
+    intervention_summaries: list[MultiInterventionSummaryItem]
+    min_effect_threshold: float
+    node_count: int
+    affected_node_count: int
+    unaffected_node_count: int
+    total_absolute_change: float
+    average_absolute_change: float
+    market_change_level: float
+    max_affected_node: str | None
+    max_affected_change: float | None
+    max_affected_change_abs: float | None
+    affected_nodes: list[MultiInterventionNodeChange]
+    missing_nodes: list[str]
+
+
+class MultiInterventionImpactResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: MultiInterventionImpactResult
+
+
+class InterventionRankingParams(BaseModel):
+    outcome_node: str
+    intervention_delta: float = 1.0
+    candidate_nodes: list[str] | None = None
+    top_k: int = 5
+    min_effect_threshold: float = 0.0001
+
+
+class InterventionRankingRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.example.intervention_ranking"
+    params: InterventionRankingParams
+
+
+class InterventionRankingItem(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    rank: int
+    candidate_node: str
+    effect_on_outcome: float
+    abs_effect_on_outcome: float
+    affected_node_count: int
+    downstream_affected_node_count: int
+    market_change_level: float
+    total_absolute_change: float
+    max_affected_node: str | None
+    max_affected_change_abs: float | None
+
+
+class InterventionRankingResult(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    outcome_node: str
+    outcome_known: bool
+    intervention_delta: float
+    min_effect_threshold: float
+    top_k: int
+    candidate_count: int
+    evaluated_candidate_count: int
+    ranked_candidate_count: int
+    missing_nodes: list[str]
+    missing_candidate_nodes: list[str]
+    rankings: list[InterventionRankingItem]
+
+
+class InterventionRankingResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: InterventionRankingResult
+
+
+class VerbCatalogParams(BaseModel):
+    detail: str = "full"
+    include_examples: bool = True
+
+
+class VerbCatalogRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.example.verb_catalog"
+    params: VerbCatalogParams = Field(default_factory=VerbCatalogParams)
+
+
+class VerbCatalogResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: dict
+
+
+class MarketInterpretParams(BaseModel):
+    request: dict
+
+
+class MarketInterpretRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.market.interpret_request"
+    params: MarketInterpretParams
+
+
+class MarketInterpretResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: dict
+
+
+class MarketParseParams(BaseModel):
+    request: dict
+
+
+class MarketParseRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.market.parse_request"
+    params: MarketParseParams
+
+
+class MarketParseResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: dict
+
+
+class MarketBatchParams(BaseModel):
+    requests: list[dict]
+    stop_on_error: bool = False
+
+
+class MarketBatchRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.market.batch_execute"
+    params: MarketBatchParams
+
+
+class MarketBatchResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: dict
+
+
 registry = CAPVerbRegistry()
 
 
@@ -300,14 +805,25 @@ def graph_markov_blanket(
 ) -> CAPHandlerSuccessSpec:
     del request
     params = payload.params
-    ids = toy_graph.markov_blanket(params.node_id)
-    limited = ids[: params.max_neighbors]
+    parent_ids = toy_graph.neighbors(params.node_id, "parents")
+    child_ids = toy_graph.neighbors(params.node_id, "children")
+    spouse_ids: set[str] = set()
+    for child_id in child_ids:
+        spouse_ids.update(toy_graph.neighbors(child_id, "parents"))
+    spouse_ids.discard(params.node_id)
+
+    flattened = (
+        [{"node_id": node_id, "roles": ["parent"]} for node_id in parent_ids]
+        + [{"node_id": node_id, "roles": ["child"]} for node_id in child_ids]
+        + [{"node_id": node_id, "roles": ["spouse"]} for node_id in sorted(spouse_ids)]
+    )
+    limited = flattened[: params.max_neighbors]
     return CAPHandlerSuccessSpec(
         result={
             "node_id": params.node_id,
-            "neighbors": [{"node_id": node_id, "roles": ["parent"]} for node_id in limited],
-            "total_candidate_count": len(ids),
-            "truncated": len(limited) < len(ids),
+            "neighbors": limited,
+            "total_candidate_count": len(flattened),
+            "truncated": len(flattened) > len(limited),
             "edge_semantics": "markov_blanket_membership",
             "reasoning_mode": REASONING_MODE_STRUCTURAL_SEMANTICS,
             "identification_status": IDENTIFICATION_STATUS_NOT_APPLICABLE,
@@ -423,6 +939,489 @@ def dataset_profile(payload: DatasetProfileRequest, request: Request) -> dict:
     }
 
 
+@registry.extension(
+    namespace="example",
+    name="dataset_density",
+    request_model=DatasetDensityRequest,
+    response_model=DatasetDensityResponse,
+    description=(
+        "Return summary graph statistics for the synthetic demo dataset, "
+        "including density, sparsity, and degree distribution summaries."
+    ),
+)
+def dataset_density(payload: DatasetDensityRequest, request: Request) -> dict:
+    del request
+    metrics = toy_graph.dataset_density_metrics()
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "dataset-density",
+        "verb": payload.verb,
+        "status": "success",
+        "result": {
+            "graph_id": toy_graph.GRAPH_ID,
+            "graph_version": toy_graph.GRAPH_VERSION,
+            "synthetic": True,
+            **metrics,
+        },
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="connectivity_report",
+    request_model=ConnectivityReportRequest,
+    response_model=ConnectivityReportResponse,
+    description=(
+        "Return connectivity summary between two nodes, including connected status, "
+        "shortest path, longest path, and all discovered paths."
+    ),
+)
+def connectivity_report(payload: ConnectivityReportRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    result = toy_graph.connectivity_report(
+        params.source_node_id,
+        params.target_node_id,
+        max_paths=params.max_paths,
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "connectivity-report",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="path_contribution_report",
+    request_model=PathContributionReportRequest,
+    response_model=PathContributionReportResponse,
+    description=(
+        "Return per-path contribution decomposition between source and target, "
+        "including path-level effect, normalized shares, and dominant path."
+    ),
+)
+def path_contribution_report(payload: PathContributionReportRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    result = toy_graph.path_contribution_report(
+        params.source_node_id,
+        params.target_node_id,
+        max_paths=params.max_paths,
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "path-contribution-report",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="market_impact",
+    request_model=MarketImpactRequest,
+    response_model=MarketImpactResponse,
+    description=(
+        "Estimate intervention propagation level over the toy market graph, including "
+        "affected node count, aggregate impact level, and maximum changed node."
+    ),
+)
+def market_impact(payload: MarketImpactRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    result = toy_graph.market_impact_report(
+        params.target_node,
+        params.intervention_delta,
+        min_effect_threshold=params.min_effect_threshold,
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "market-impact",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="node_systemic_risk",
+    request_model=NodeSystemicRiskRequest,
+    response_model=NodeSystemicRiskResponse,
+    description=(
+        "Estimate systemic risk concentration for a node under stress, combining "
+        "propagation breadth, impact intensity, structural centrality, and concentration."
+    ),
+)
+def node_systemic_risk(payload: NodeSystemicRiskRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    result = toy_graph.node_systemic_risk_report(
+        params.node_id,
+        params.stress_delta,
+        min_effect_threshold=params.min_effect_threshold,
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "node-systemic-risk",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="multi_intervention_impact",
+    request_model=MultiInterventionImpactRequest,
+    response_model=MultiInterventionImpactResponse,
+    description=(
+        "Estimate aggregate market impact when multiple intervention nodes are changed "
+        "at once, including combined affected nodes and per-intervention summaries."
+    ),
+)
+def multi_intervention_impact(payload: MultiInterventionImpactRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    interventions = [
+        {
+            "target_node": item.target_node,
+            "intervention_delta": item.intervention_delta,
+        }
+        for item in params.interventions
+    ]
+    result = toy_graph.multi_intervention_impact_report(
+        interventions,
+        min_effect_threshold=params.min_effect_threshold,
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "multi-intervention-impact",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="intervention_ranking",
+    request_model=InterventionRankingRequest,
+    response_model=InterventionRankingResponse,
+    description=(
+        "Rank intervention candidates for a target outcome node by expected effect size "
+        "and aggregate market impact."
+    ),
+)
+def intervention_ranking(payload: InterventionRankingRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    result = toy_graph.intervention_ranking_report(
+        params.outcome_node,
+        params.intervention_delta,
+        candidate_nodes=params.candidate_nodes,
+        top_k=params.top_k,
+        min_effect_threshold=params.min_effect_threshold,
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "intervention-ranking",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="verb_catalog",
+    request_model=VerbCatalogRequest,
+    response_model=VerbCatalogResponse,
+    description=(
+        "Return a usage-oriented catalog for all mounted CAP verbs, including "
+        "examples and extension groupings."
+    ),
+)
+def verb_catalog(payload: VerbCatalogRequest, request: Request) -> dict:
+    del request
+    detail = "full" if payload.params.detail == "full" else "compact"
+    methods = registry.list_methods(
+        detail=detail,
+        include_examples=payload.params.include_examples,
+    )
+    method_rows = []
+    for item in methods:
+        row = item.model_dump(exclude_none=True)
+        if payload.params.include_examples:
+            existing = row.get("examples")
+            if not isinstance(existing, list) or not existing:
+                row["examples"] = [_example_request_for_verb(row.get("verb", ""))]
+        method_rows.append(row)
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "verb-catalog",
+        "verb": payload.verb,
+        "status": "success",
+        "result": {
+            "summary": {
+                "core_count": len(registry.verbs_for_surface("core")),
+                "convenience_count": len(registry.verbs_for_surface("convenience")),
+                "extension_count": sum(
+                    len(verbs) for verbs in registry.extension_verbs_by_namespace.values()
+                ),
+            },
+            "supported_verbs": {
+                "core": registry.verbs_for_surface("core"),
+                "convenience": registry.verbs_for_surface("convenience"),
+                "extensions": registry.extension_verbs_by_namespace,
+            },
+            "methods": method_rows,
+        },
+    }
+
+
+def _example_request_for_verb(verb: str) -> dict:
+    base = {
+        "cap_version": "0.2.2",
+        "request_id": f"example-{verb.replace('.', '-')}",
+        "verb": verb,
+    }
+    params_by_verb = {
+        "meta.methods": {"detail": "compact"},
+        "observe.predict": {"target_node": "revenue"},
+        "intervene.do": {
+            "treatment_node": "marketing_spend",
+            "treatment_value": 1.0,
+            "outcome_node": "revenue",
+        },
+        "graph.neighbors": {"node_id": "demand", "scope": "parents", "max_neighbors": 5},
+        "graph.markov_blanket": {"node_id": "demand", "max_neighbors": 20},
+        "graph.paths": {
+            "source_node_id": "marketing_spend",
+            "target_node_id": "revenue",
+            "max_paths": 5,
+            "max_depth": 10,
+            "directed": True,
+        },
+        "traverse.parents": {"node_id": "demand", "top_k": 5},
+        "traverse.children": {"node_id": "marketing_spend", "top_k": 5},
+        "extensions.example.connectivity_report": {
+            "source_node_id": "product_quality",
+            "target_node_id": "revenue",
+            "max_paths": 10,
+        },
+        "extensions.example.path_contribution_report": {
+            "source_node_id": "product_quality",
+            "target_node_id": "revenue",
+            "max_paths": 10,
+        },
+        "extensions.example.market_impact": {
+            "target_node": "marketing_spend",
+            "intervention_delta": 1.0,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.node_systemic_risk": {
+            "node_id": "product_quality",
+            "stress_delta": 1.0,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.multi_intervention_impact": {
+            "interventions": [
+                {"target_node": "marketing_spend", "intervention_delta": 1.0},
+                {"target_node": "product_quality", "intervention_delta": 1.0},
+            ],
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.intervention_ranking": {
+            "outcome_node": "revenue",
+            "intervention_delta": 1.0,
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand"],
+            "top_k": 3,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.dataset_density": {},
+        "extensions.example.verb_catalog": {"detail": "compact", "include_examples": True},
+        "extensions.market.parse_request": {
+            "request": {
+                "cap_version": "0.2.2",
+                "verb": "graph.neighbors",
+                "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5},
+            }
+        },
+        "extensions.market.batch_execute": {
+            "requests": [
+                {
+                    "cap_version": "0.2.2",
+                    "verb": "observe.predict",
+                    "params": {"target_node": "revenue"},
+                },
+                {
+                    "cap_version": "0.2.2",
+                    "verb": "graph.neighbors",
+                    "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5},
+                },
+            ]
+        },
+        "extensions.market.interpret_request": {
+            "request": {
+                "cap_version": "0.2.2",
+                "verb": "graph.neighbors",
+                "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5},
+            }
+        },
+    }
+    params = params_by_verb.get(verb)
+    if params is not None:
+        base["params"] = params
+    return base
+
+
+@registry.extension(
+    namespace="market",
+    name="parse_request",
+    request_model=MarketParseRequest,
+    response_model=MarketParseResponse,
+    description=(
+        "Parse an embedded CAP request and return extracted nodes plus mapped "
+        "graph-computer function plan."
+    ),
+)
+def market_parse_request(payload: MarketParseRequest, request: Request) -> dict:
+    del request
+    effective_options = runtime_config.merge_market_options(payload.options)
+    try:
+        parsed = parse_cap_request(payload.params.request)
+        result = {
+            "parsed_request": {
+                "verb": parsed.verb,
+                "node_ids": parsed.node_ids,
+                "params": parsed.params,
+            },
+            "function_plan": get_cap_function_plan(parsed.verb),
+            "effective_options": effective_options,
+        }
+        status = "success"
+    except ValueError as error:
+        result = {
+            "parse_error": str(error),
+            "effective_options": effective_options,
+        }
+        status = "invalid_request"
+
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "market-parse-request",
+        "verb": payload.verb,
+        "status": status,
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="market",
+    name="batch_execute",
+    request_model=MarketBatchRequest,
+    response_model=MarketBatchResponse,
+    description=(
+        "Execute multiple embedded CAP requests through the market pipeline and "
+        "return per-request stage outcomes."
+    ),
+)
+async def market_batch_execute(payload: MarketBatchRequest, request: Request) -> dict:
+    del request
+    effective_options = runtime_config.merge_market_options(payload.options)
+    items: list[dict] = []
+    success_count = 0
+
+    for index, embedded in enumerate(payload.params.requests):
+        run_result = await market_interpretation.interpret_cap_request(
+            embedded,
+            options=effective_options,
+        )
+        stages = run_result.get("stages", {}) if isinstance(run_result, dict) else {}
+        stage_statuses = {
+            stage_name: stage_payload.get("status", "unknown")
+            for stage_name, stage_payload in stages.items()
+            if isinstance(stage_payload, dict)
+        }
+        stage_ok = (
+            stage_statuses.get("parse") == "success"
+            and stage_statuses.get("graph_operations") == "success"
+            and stage_statuses.get("calculation") == "success"
+            and stage_statuses.get("postprocess") == "success"
+            and stage_statuses.get("analysis") == "success"
+        )
+        if stage_ok:
+            success_count += 1
+        items.append(
+            {
+                "index": index,
+                "request": embedded,
+                "stage_statuses": stage_statuses,
+                "ok": stage_ok,
+                "result": run_result,
+            }
+        )
+        if payload.params.stop_on_error and not stage_ok:
+            break
+
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "market-batch-execute",
+        "verb": payload.verb,
+        "status": "success",
+        "result": {
+            "total_requests": len(payload.params.requests),
+            "executed_requests": len(items),
+            "success_count": success_count,
+            "failure_count": len(items) - success_count,
+            "stopped_early": (
+                payload.params.stop_on_error and len(items) < len(payload.params.requests)
+            ),
+            "items": items,
+        },
+    }
+
+
+@registry.extension(
+    namespace="market",
+    name="interpret_request",
+    request_model=MarketInterpretRequest,
+    response_model=MarketInterpretResponse,
+    description=(
+        "Parse an embedded CAP request and return staged graph/calc/postprocess/analysis "
+        "results for market nodes."
+    ),
+)
+async def market_interpret_request(payload: MarketInterpretRequest, request: Request) -> dict:
+    del request
+    effective_options = runtime_config.merge_market_options(payload.options)
+    result = await market_interpretation.interpret_cap_request(
+        payload.params.request,
+        options=effective_options,
+    )
+    debug_cfg = (
+        effective_options.get("debug", {})
+        if isinstance(effective_options, dict)
+        else {}
+    )
+    if isinstance(result, dict) and isinstance(debug_cfg, dict):
+        if bool(debug_cfg.get("include_runtime_config", False)):
+            result["runtime_config"] = runtime_config.runtime_config_debug_view()
+
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "market-interpret-request",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
 async def provenance_context_provider(
     payload: object,
     request: Request,
@@ -466,6 +1465,11 @@ def health() -> dict:
         "app_name": "cap-example",
         "version": __version__,
     }
+
+
+@app.get("/debug/runtime-config")
+def debug_runtime_config() -> dict:
+    return runtime_config.runtime_config_debug_view()
 
 
 @app.get("/.well-known/cap.json")

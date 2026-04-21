@@ -1,0 +1,349 @@
+{
+  "map_version": "2026-03-26",
+  "cap_version": "0.2.2",
+  "source_repository": {
+    "name": "cap-example",
+    "url": "https://github.com/CausalAgentProtocol/cap-example",
+    "ref": "toy-graph-only",
+    "retrieved_at": "2026-03-26"
+  },
+  "stage_pipeline_map": {
+    "parse": {
+      "owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.market_pipeline.parser",
+          "function": "parse_cap_request",
+          "purpose": "Parse CAP envelope and extract focal nodes from params."
+        }
+      ]
+    },
+    "graph_operations": {
+      "owner": "cap-example",
+      "notes": [
+        "Toy graph only in this example.",
+        "Retrieval is bounded local traversal over in-memory graph."
+      ],
+      "functions": [
+        {
+          "module": "example_cap_server.market_pipeline.graph_ops",
+          "function": "build_local_graph",
+          "async": true,
+          "purpose": "Build bounded local graph excerpt around requested nodes."
+        }
+      ]
+    },
+    "calculation": {
+      "owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.market_pipeline.graph_ops",
+          "function": "calculate_verb_result",
+          "async": true,
+          "purpose": "Run verb-specific toy graph calculation."
+        }
+      ]
+    },
+    "postprocess": {
+      "owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.market_pipeline.postprocess",
+          "function": "build_postprocess",
+          "purpose": "Build node properties and parent/neighbor summaries."
+        }
+      ]
+    },
+    "analysis": {
+      "owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.market_pipeline.analysis",
+          "function": "build_analysis",
+          "purpose": "Summarize graph/calculation/postprocess statistics."
+        }
+      ]
+    }
+  },
+  "cap_verb_function_map": {
+    "meta.capabilities": {
+      "runtime_owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.main",
+          "function": "meta_capabilities",
+          "purpose": "Return capability metadata for mounted CAP surface."
+        }
+      ]
+    },
+    "meta.methods": {
+      "runtime_owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.main",
+          "function": "meta_methods",
+          "purpose": "Return mounted method descriptors from active registry."
+        }
+      ]
+    },
+    "observe.predict": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.target_node"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "compute_prediction",
+          "purpose": "Compute deterministic prediction for target node."
+        }
+      ]
+    },
+    "intervene.do": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.treatment_node",
+        "params.treatment_value",
+        "params.outcome_node"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "total_path_effect",
+          "purpose": "Compute treatment-to-outcome effect along directed paths."
+        }
+      ]
+    },
+    "graph.neighbors": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.node_id",
+        "params.scope"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "neighbors",
+          "purpose": "Return immediate parents or children of node."
+        }
+      ]
+    },
+    "graph.markov_blanket": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.node_id"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.market_pipeline.graph_ops",
+          "function": "_toy_markov_blanket",
+          "purpose": "Build toy markov blanket from parent/child/spouse sets."
+        }
+      ]
+    },
+    "graph.paths": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.source_node_id",
+        "params.target_node_id"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "find_paths",
+          "purpose": "Return directed toy paths between source and target."
+        }
+      ]
+    },
+    "traverse.parents": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.node_id",
+        "params.top_k"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "neighbors",
+          "purpose": "Convenience parent traversal from neighbors."
+        }
+      ]
+    },
+    "traverse.children": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.node_id",
+        "params.top_k"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "neighbors",
+          "purpose": "Convenience child traversal from neighbors."
+        }
+      ]
+    },
+    "extensions.example.dataset_profile": {
+      "runtime_owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.main",
+          "function": "dataset_profile",
+          "purpose": "Return metadata for the toy demo graph."
+        }
+      ]
+    },
+    "extensions.example.connectivity_report": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.source_node_id",
+        "params.target_node_id"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "connectivity_report",
+          "purpose": "Return connected/shortest/longest/all-path summary between two nodes."
+        }
+      ]
+    },
+    "extensions.example.path_contribution_report": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.source_node_id",
+        "params.target_node_id"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "path_contribution_report",
+          "purpose": "Return per-path effect contribution decomposition between source and target."
+        }
+      ]
+    },
+    "extensions.example.market_impact": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.target_node",
+        "params.intervention_delta"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "market_impact_report",
+          "purpose": "Return intervention propagation/impact summary across the mounted graph."
+        }
+      ]
+    },
+    "extensions.example.node_systemic_risk": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.node_id"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "node_systemic_risk_report",
+          "purpose": "Return node-level systemic risk profile under stress."
+        }
+      ]
+    },
+    "extensions.example.multi_intervention_impact": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.interventions[]",
+        "params.interventions[].target_node"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "multi_intervention_impact_report",
+          "purpose": "Return aggregate market impact across multiple intervention targets."
+        }
+      ]
+    },
+    "extensions.example.intervention_ranking": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.outcome_node",
+        "params.intervention_delta"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "intervention_ranking_report",
+          "purpose": "Rank intervention candidates by outcome effect size and aggregate market impact."
+        }
+      ]
+    },
+    "extensions.example.dataset_density": {
+      "runtime_owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.main",
+          "function": "dataset_density",
+          "purpose": "Return density-oriented graph statistics for the toy demo graph."
+        }
+      ]
+    },
+    "extensions.example.verb_catalog": {
+      "runtime_owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.main",
+          "function": "verb_catalog",
+          "purpose": "Return usage catalog for mounted CAP verbs."
+        }
+      ]
+    },
+    "extensions.market.parse_request": {
+      "runtime_owner": "cap-example",
+      "functions": [
+        {
+          "module": "example_cap_server.market_pipeline.parser",
+          "function": "parse_cap_request",
+          "purpose": "Parse embedded CAP request and extract node ids."
+        },
+        {
+          "module": "example_cap_server.integrations.abel_graph_computer_adapter",
+          "function": "get_cap_function_plan",
+          "purpose": "Return function plan entry for parsed verb."
+        }
+      ]
+    },
+    "extensions.market.batch_execute": {
+      "runtime_owner": "cap-example",
+      "pipeline": [
+        "parse",
+        "graph_operations",
+        "calculation",
+        "postprocess",
+        "analysis"
+      ],
+      "functions": [
+        {
+          "module": "example_cap_server.main",
+          "function": "market_batch_execute",
+          "purpose": "Run multiple embedded CAP requests via toy graph pipeline."
+        }
+      ]
+    },
+    "extensions.market.interpret_request": {
+      "runtime_owner": "cap-example",
+      "pipeline": [
+        "parse",
+        "graph_operations",
+        "calculation",
+        "postprocess",
+        "analysis"
+      ],
+      "functions": [
+        {
+          "module": "example_cap_server.main",
+          "function": "market_interpret_request",
+          "purpose": "Run staged toy-graph pipeline for one embedded CAP request."
+        }
+      ]
+    }
+  }
+}

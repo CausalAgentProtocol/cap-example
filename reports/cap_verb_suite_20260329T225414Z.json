@@ -1,0 +1,1050 @@
+{
+  "cases": [
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-meta-capabilities",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "request_id": "direct-meta-capabilities-1774824854880",
+        "verb": "meta.capabilities"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "meta.capabilities"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-meta-methods-compact",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "detail": "compact"
+        },
+        "request_id": "direct-meta-methods-compact-1774824854880",
+        "verb": "meta.methods"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "meta.methods"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-meta-methods-full",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "detail": "full"
+        },
+        "request_id": "direct-meta-methods-full-1774824854880",
+        "verb": "meta.methods"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "meta.methods"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-observe-predict",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "target_node": "revenue"
+        },
+        "request_id": "direct-observe-predict-1774824854880",
+        "verb": "observe.predict"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "observe.predict"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-intervene-do",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "outcome_node": "revenue",
+          "treatment_node": "marketing_spend",
+          "treatment_value": 2.0
+        },
+        "request_id": "direct-intervene-do-1774824854880",
+        "verb": "intervene.do"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "intervene.do"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-graph-neighbors",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "max_neighbors": 5,
+          "node_id": "demand",
+          "scope": "parents"
+        },
+        "request_id": "direct-graph-neighbors-1774824854880",
+        "verb": "graph.neighbors"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "graph.neighbors"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-graph-markov-blanket",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "max_neighbors": 20,
+          "node_id": "demand"
+        },
+        "request_id": "direct-graph-markov-blanket-1774824854880",
+        "verb": "graph.markov_blanket"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "graph.markov_blanket"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-graph-paths",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "directed": true,
+          "max_depth": 10,
+          "max_paths": 5,
+          "source_node_id": "marketing_spend",
+          "target_node_id": "revenue"
+        },
+        "request_id": "direct-graph-paths-1774824854880",
+        "verb": "graph.paths"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "graph.paths"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-traverse-parents",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "node_id": "demand",
+          "top_k": 5
+        },
+        "request_id": "direct-traverse-parents-1774824854880",
+        "verb": "traverse.parents"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "traverse.parents"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-traverse-children",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "node_id": "marketing_spend",
+          "top_k": 5
+        },
+        "request_id": "direct-traverse-children-1774824854880",
+        "verb": "traverse.children"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "traverse.children"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-extension-dataset-profile",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "request_id": "direct-extension-dataset-profile-1774824854880",
+        "verb": "extensions.example.dataset_profile"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.example.dataset_profile"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-extension-verb-catalog",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "detail": "compact"
+        },
+        "request_id": "direct-extension-verb-catalog-1774824854880",
+        "verb": "extensions.example.verb_catalog"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.example.verb_catalog"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-extension-market-parse-request",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "node_id": "demand",
+              "scope": "parents"
+            },
+            "verb": "graph.neighbors"
+          }
+        },
+        "request_id": "direct-extension-market-parse-request-1774824854880",
+        "verb": "extensions.market.parse_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.parse_request"
+    },
+    {
+      "cap_status": null,
+      "category": "direct",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "direct-extension-market-batch-execute",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "requests": [
+            {
+              "cap_version": "0.2.2",
+              "params": {
+                "target_node": "revenue"
+              },
+              "verb": "observe.predict"
+            },
+            {
+              "cap_version": "0.2.2",
+              "params": {
+                "max_neighbors": 8,
+                "node_id": "demand",
+                "scope": "parents"
+              },
+              "verb": "graph.neighbors"
+            }
+          ],
+          "stop_on_error": false
+        },
+        "request_id": "direct-extension-market-batch-execute-1774824854880",
+        "verb": "extensions.market.batch_execute"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.batch_execute"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-meta-capabilities",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "verb": "meta.capabilities"
+          }
+        },
+        "request_id": "pipeline-meta-capabilities-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-meta-methods",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "detail": "compact"
+            },
+            "verb": "meta.methods"
+          }
+        },
+        "request_id": "pipeline-meta-methods-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-observe-predict",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "target_node": "revenue"
+            },
+            "verb": "observe.predict"
+          }
+        },
+        "request_id": "pipeline-observe-predict-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-intervene-do",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "outcome_node": "revenue",
+              "treatment_node": "marketing_spend",
+              "treatment_value": 1.0
+            },
+            "verb": "intervene.do"
+          }
+        },
+        "request_id": "pipeline-intervene-do-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-graph-neighbors",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "max_neighbors": 8,
+              "node_id": "demand",
+              "scope": "parents"
+            },
+            "verb": "graph.neighbors"
+          }
+        },
+        "request_id": "pipeline-graph-neighbors-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-graph-markov_blanket",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "max_neighbors": 20,
+              "node_id": "demand"
+            },
+            "verb": "graph.markov_blanket"
+          }
+        },
+        "request_id": "pipeline-graph-markov_blanket-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-graph-paths",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "directed": true,
+              "max_depth": 8,
+              "max_paths": 5,
+              "source_node_id": "marketing_spend",
+              "target_node_id": "revenue"
+            },
+            "verb": "graph.paths"
+          }
+        },
+        "request_id": "pipeline-graph-paths-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-traverse-parents",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "node_id": "demand",
+              "top_k": 8
+            },
+            "verb": "traverse.parents"
+          }
+        },
+        "request_id": "pipeline-traverse-parents-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-traverse-children",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "node_id": "demand",
+              "top_k": 8
+            },
+            "verb": "traverse.children"
+          }
+        },
+        "request_id": "pipeline-traverse-children-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-extensions-example-dataset_profile",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "verb": "extensions.example.dataset_profile"
+          }
+        },
+        "request_id": "pipeline-extensions-example-dataset_profile-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    },
+    {
+      "cap_status": null,
+      "category": "pipeline",
+      "duration_ms": 0,
+      "error": "ConnectError('[Errno 1] Operation not permitted')",
+      "failure_details": [
+        "ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "failure_reason": "request_exception",
+      "functional_ok": false,
+      "http_status": null,
+      "name": "pipeline-extensions-example-verb_catalog",
+      "notes": [
+        "request_exception: ConnectError('[Errno 1] Operation not permitted')"
+      ],
+      "pipeline_stage_statuses": null,
+      "request_ok": false,
+      "request_payload": {
+        "cap_version": "0.2.2",
+        "params": {
+          "request": {
+            "cap_version": "0.2.2",
+            "params": {
+              "detail": "compact",
+              "include_examples": false
+            },
+            "verb": "extensions.example.verb_catalog"
+          }
+        },
+        "request_id": "pipeline-extensions-example-verb_catalog-1774824854880",
+        "verb": "extensions.market.interpret_request"
+      },
+      "response_json": null,
+      "response_text": null,
+      "verb": "extensions.market.interpret_request"
+    }
+  ],
+  "run": {
+    "base_url": "http://127.0.0.1:8010",
+    "id": "20260329T225414Z",
+    "started_at_utc": "20260329T225414Z",
+    "total_cases": 25,
+    "total_duration_ms": 67
+  },
+  "summary": {
+    "failed_case_reasons": {
+      "direct-extension-dataset-profile": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-extension-market-batch-execute": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-extension-market-parse-request": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-extension-verb-catalog": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-graph-markov-blanket": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-graph-neighbors": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-graph-paths": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-intervene-do": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-meta-capabilities": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-meta-methods-compact": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-meta-methods-full": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-observe-predict": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-traverse-children": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "direct-traverse-parents": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-extensions-example-dataset_profile": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-extensions-example-verb_catalog": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-graph-markov_blanket": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-graph-neighbors": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-graph-paths": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-intervene-do": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-meta-capabilities": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-meta-methods": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-observe-predict": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-traverse-children": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      },
+      "pipeline-traverse-parents": {
+        "failure_details": [
+          "ConnectError('[Errno 1] Operation not permitted')"
+        ],
+        "failure_reason": "request_exception"
+      }
+    },
+    "failed_function_cases": [
+      "direct-meta-capabilities",
+      "direct-meta-methods-compact",
+      "direct-meta-methods-full",
+      "direct-observe-predict",
+      "direct-intervene-do",
+      "direct-graph-neighbors",
+      "direct-graph-markov-blanket",
+      "direct-graph-paths",
+      "direct-traverse-parents",
+      "direct-traverse-children",
+      "direct-extension-dataset-profile",
+      "direct-extension-verb-catalog",
+      "direct-extension-market-parse-request",
+      "direct-extension-market-batch-execute",
+      "pipeline-meta-capabilities",
+      "pipeline-meta-methods",
+      "pipeline-observe-predict",
+      "pipeline-intervene-do",
+      "pipeline-graph-neighbors",
+      "pipeline-graph-markov_blanket",
+      "pipeline-graph-paths",
+      "pipeline-traverse-parents",
+      "pipeline-traverse-children",
+      "pipeline-extensions-example-dataset_profile",
+      "pipeline-extensions-example-verb_catalog"
+    ],
+    "failed_request_cases": [
+      "direct-meta-capabilities",
+      "direct-meta-methods-compact",
+      "direct-meta-methods-full",
+      "direct-observe-predict",
+      "direct-intervene-do",
+      "direct-graph-neighbors",
+      "direct-graph-markov-blanket",
+      "direct-graph-paths",
+      "direct-traverse-parents",
+      "direct-traverse-children",
+      "direct-extension-dataset-profile",
+      "direct-extension-verb-catalog",
+      "direct-extension-market-parse-request",
+      "direct-extension-market-batch-execute",
+      "pipeline-meta-capabilities",
+      "pipeline-meta-methods",
+      "pipeline-observe-predict",
+      "pipeline-intervene-do",
+      "pipeline-graph-neighbors",
+      "pipeline-graph-markov_blanket",
+      "pipeline-graph-paths",
+      "pipeline-traverse-parents",
+      "pipeline-traverse-children",
+      "pipeline-extensions-example-dataset_profile",
+      "pipeline-extensions-example-verb_catalog"
+    ],
+    "functional_ok_count": 0,
+    "functional_ok_rate": 0.0,
+    "request_ok_count": 0,
+    "request_ok_rate": 0.0
+  }
+}

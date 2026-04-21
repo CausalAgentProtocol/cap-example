@@ -1,0 +1,6 @@
+[market_interpretation.default_options.graph_operations.local_graph]
+max_hops = 1
+max_nodes = 64
+
+[market_interpretation.default_options.debug]
+include_runtime_config = false
