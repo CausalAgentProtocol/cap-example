@@ -276,6 +276,157 @@
         }
       ]
     },
+    "extensions.example.node_criticality_ranking": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.stress_delta"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "node_criticality_ranking_report",
+          "purpose": "Rank nodes by systemic criticality under stress propagation."
+        }
+      ]
+    },
+    "extensions.example.edge_criticality_ranking": {
+      "runtime_owner": "cap-example",
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "edge_criticality_ranking_report",
+          "purpose": "Rank edges by influence loss under edge removal."
+        }
+      ]
+    },
+    "extensions.example.goal_seek_intervention": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.outcome_node",
+        "params.target_outcome_change"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "goal_seek_intervention_report",
+          "purpose": "Propose intervention plans that achieve a target outcome change."
+        }
+      ]
+    },
+    "extensions.example.budgeted_intervention_optimizer": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.outcome_node",
+        "params.budget"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "budgeted_intervention_optimizer_report",
+          "purpose": "Allocate intervention budget across candidates for a target outcome objective."
+        }
+      ]
+    },
+    "extensions.example.pareto_intervention_frontier": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.outcome_node",
+        "params.intervention_delta"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "pareto_intervention_frontier_report",
+          "purpose": "Compute non-dominated interventions on outcome impact vs disruption frontier."
+        }
+      ]
+    },
+    "extensions.example.scenario_compare": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.scenarios[]",
+        "params.scenarios[].interventions[]"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "scenario_compare_report",
+          "purpose": "Compare multiple intervention scenarios using consistent impact metrics."
+        }
+      ]
+    },
+    "extensions.example.shock_cascade_simulation": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.target_node",
+        "params.shock_delta"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "shock_cascade_simulation_report",
+          "purpose": "Simulate discrete-step shock propagation through directed edges."
+        }
+      ]
+    },
+    "extensions.example.resilience_report": {
+      "runtime_owner": "cap-example",
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "resilience_report",
+          "purpose": "Estimate graph resilience against node/edge failures."
+        }
+      ]
+    },
+    "extensions.example.target_vulnerability_report": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.target_node"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "target_vulnerability_report",
+          "purpose": "Rank upstream sources by vulnerability contribution to a target node."
+        }
+      ]
+    },
+    "extensions.example.bottleneck_report": {
+      "runtime_owner": "cap-example",
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "bottleneck_report",
+          "purpose": "Identify nodes and edges with highest path participation."
+        }
+      ]
+    },
+    "extensions.example.influence_matrix": {
+      "runtime_owner": "cap-example",
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "influence_matrix_report",
+          "purpose": "Return source-target influence matrix and centrality-like strengths."
+        }
+      ]
+    },
+    "extensions.example.intervention_battle": {
+      "runtime_owner": "cap-example",
+      "input_requirements": [
+        "params.outcome_node",
+        "params.plan_a",
+        "params.plan_b"
+      ],
+      "primary_functions": [
+        {
+          "module": "example_cap_server.toy_graph",
+          "function": "intervention_battle_report",
+          "purpose": "Compare two intervention plans with an outcome-vs-disruption battle score."
+        }
+      ]
+    },
     "extensions.example.dataset_density": {
       "runtime_owner": "cap-example",
       "functions": [

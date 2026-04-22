@@ -1,10 +1,140 @@
 from fastapi.testclient import TestClient
+import pytest
 
 from example_cap_server.integrations import get_cap_function_plan, load_cap_function_map
 from example_cap_server.main import app
 
 
 client = TestClient(app)
+
+NEW_EXTENSION_CASES = [
+    (
+        "extensions.example.node_criticality_ranking",
+        {
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand", "retention"],
+            "stress_delta": 1.0,
+            "top_k": 3,
+            "min_effect_threshold": 0.0001,
+        },
+        "rankings",
+    ),
+    (
+        "extensions.example.edge_criticality_ranking",
+        {"top_k": 3},
+        "rankings",
+    ),
+    (
+        "extensions.example.goal_seek_intervention",
+        {
+            "outcome_node": "revenue",
+            "target_outcome_change": 3.0,
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand"],
+            "max_plans": 3,
+            "min_effect_threshold": 0.0001,
+        },
+        "plans",
+    ),
+    (
+        "extensions.example.budgeted_intervention_optimizer",
+        {
+            "outcome_node": "revenue",
+            "budget": 2.0,
+            "objective": "increase",
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand"],
+            "max_allocations": 2,
+            "min_effect_threshold": 0.0001,
+        },
+        "allocations",
+    ),
+    (
+        "extensions.example.pareto_intervention_frontier",
+        {
+            "outcome_node": "revenue",
+            "intervention_delta": 1.0,
+            "objective": "increase",
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand", "retention"],
+            "min_effect_threshold": 0.0001,
+        },
+        "frontier",
+    ),
+    (
+        "extensions.example.scenario_compare",
+        {
+            "outcome_node": "revenue",
+            "scenarios": [
+                {
+                    "name": "growth_push",
+                    "interventions": [
+                        {"target_node": "marketing_spend", "intervention_delta": 1.5},
+                        {"target_node": "product_quality", "intervention_delta": 0.5},
+                    ],
+                },
+                {
+                    "name": "quality_focus",
+                    "interventions": [
+                        {"target_node": "product_quality", "intervention_delta": 1.5},
+                    ],
+                },
+            ],
+            "min_effect_threshold": 0.0001,
+        },
+        "scenarios",
+    ),
+    (
+        "extensions.example.shock_cascade_simulation",
+        {
+            "target_node": "product_quality",
+            "shock_delta": 1.0,
+            "steps": 3,
+            "damping": 0.6,
+            "min_effect_threshold": 0.0001,
+        },
+        "steps",
+    ),
+    (
+        "extensions.example.resilience_report",
+        {"top_k": 3, "min_effect_threshold": 0.0001},
+        "resilience_index",
+    ),
+    (
+        "extensions.example.target_vulnerability_report",
+        {
+            "target_node": "revenue",
+            "shock_delta": 1.0,
+            "candidate_sources": ["marketing_spend", "product_quality", "demand", "retention"],
+            "top_k": 3,
+            "min_effect_threshold": 0.0001,
+        },
+        "rankings",
+    ),
+    (
+        "extensions.example.bottleneck_report",
+        {"top_k": 3, "max_paths_per_pair": 20},
+        "top_nodes",
+    ),
+    (
+        "extensions.example.influence_matrix",
+        {"node_ids": ["marketing_spend", "product_quality", "demand", "retention", "revenue"]},
+        "matrix",
+    ),
+    (
+        "extensions.example.intervention_battle",
+        {
+            "outcome_node": "revenue",
+            "plan_a": {
+                "name": "acquisition_heavy",
+                "interventions": [{"target_node": "marketing_spend", "intervention_delta": 1.5}],
+            },
+            "plan_b": {
+                "name": "product_heavy",
+                "interventions": [{"target_node": "product_quality", "intervention_delta": 1.0}],
+            },
+            "min_effect_threshold": 0.0001,
+            "disruption_penalty": 1.0,
+        },
+        "winner",
+    ),
+]
 
 
 def test_health_endpoint() -> None:
@@ -28,6 +158,18 @@ def test_well_known_capability_card() -> None:
     assert "extensions.example.node_systemic_risk" in body["extensions"]["example"]["verbs"]
     assert "extensions.example.multi_intervention_impact" in body["extensions"]["example"]["verbs"]
     assert "extensions.example.intervention_ranking" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.node_criticality_ranking" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.edge_criticality_ranking" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.goal_seek_intervention" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.budgeted_intervention_optimizer" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.pareto_intervention_frontier" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.scenario_compare" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.shock_cascade_simulation" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.resilience_report" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.target_vulnerability_report" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.bottleneck_report" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.influence_matrix" in body["extensions"]["example"]["verbs"]
+    assert "extensions.example.intervention_battle" in body["extensions"]["example"]["verbs"]
     assert "extensions.example.dataset_density" in body["extensions"]["example"]["verbs"]
     assert "extensions.example.verb_catalog" in body["extensions"]["example"]["verbs"]
     assert "extensions.market.parse_request" in body["extensions"]["market"]["verbs"]
@@ -56,6 +198,18 @@ def test_meta_methods_includes_extension() -> None:
     assert "extensions.example.node_systemic_risk" in methods
     assert "extensions.example.multi_intervention_impact" in methods
     assert "extensions.example.intervention_ranking" in methods
+    assert "extensions.example.node_criticality_ranking" in methods
+    assert "extensions.example.edge_criticality_ranking" in methods
+    assert "extensions.example.goal_seek_intervention" in methods
+    assert "extensions.example.budgeted_intervention_optimizer" in methods
+    assert "extensions.example.pareto_intervention_frontier" in methods
+    assert "extensions.example.scenario_compare" in methods
+    assert "extensions.example.shock_cascade_simulation" in methods
+    assert "extensions.example.resilience_report" in methods
+    assert "extensions.example.target_vulnerability_report" in methods
+    assert "extensions.example.bottleneck_report" in methods
+    assert "extensions.example.influence_matrix" in methods
+    assert "extensions.example.intervention_battle" in methods
     assert "extensions.example.dataset_density" in methods
     assert "extensions.example.verb_catalog" in methods
     assert "extensions.market.parse_request" in methods
@@ -405,6 +559,28 @@ def test_example_intervention_ranking_extension() -> None:
     assert [row["rank"] for row in result["rankings"]] == [1, 2, 3]
 
 
+@pytest.mark.parametrize(("verb", "params", "expected_key"), NEW_EXTENSION_CASES)
+def test_new_extensions_direct_smoke(
+    verb: str,
+    params: dict,
+    expected_key: str,
+) -> None:
+    response = client.post(
+        "/cap",
+        json={
+            "cap_version": "0.2.2",
+            "request_id": f"req-{verb.replace('.', '-')}",
+            "verb": verb,
+            "params": params,
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "success"
+    assert expected_key in body["result"]
+
+
 def test_market_parse_request_extension() -> None:
     response = client.post(
         "/cap",
@@ -478,6 +654,18 @@ def test_cap_function_map_has_core_verbs() -> None:
     assert "extensions.example.node_systemic_risk" in verb_map
     assert "extensions.example.multi_intervention_impact" in verb_map
     assert "extensions.example.intervention_ranking" in verb_map
+    assert "extensions.example.node_criticality_ranking" in verb_map
+    assert "extensions.example.edge_criticality_ranking" in verb_map
+    assert "extensions.example.goal_seek_intervention" in verb_map
+    assert "extensions.example.budgeted_intervention_optimizer" in verb_map
+    assert "extensions.example.pareto_intervention_frontier" in verb_map
+    assert "extensions.example.scenario_compare" in verb_map
+    assert "extensions.example.shock_cascade_simulation" in verb_map
+    assert "extensions.example.resilience_report" in verb_map
+    assert "extensions.example.target_vulnerability_report" in verb_map
+    assert "extensions.example.bottleneck_report" in verb_map
+    assert "extensions.example.influence_matrix" in verb_map
+    assert "extensions.example.intervention_battle" in verb_map
     assert "extensions.example.dataset_density" in verb_map
 
 
@@ -785,3 +973,31 @@ def test_market_interpret_request_supports_verb_catalog_embedded_request() -> No
     body = response.json()
     methods = body["result"]["calculation"]["methods"]
     assert any(item["verb"] == "extensions.example.verb_catalog" for item in methods)
+
+
+@pytest.mark.parametrize(("verb", "params", "expected_key"), NEW_EXTENSION_CASES)
+def test_market_interpret_request_supports_new_extensions_embedded_request(
+    verb: str,
+    params: dict,
+    expected_key: str,
+) -> None:
+    response = client.post(
+        "/cap",
+        json={
+            "cap_version": "0.2.2",
+            "request_id": f"req-market-{verb.replace('.', '-')}",
+            "verb": "extensions.market.interpret_request",
+            "params": {
+                "request": {
+                    "cap_version": "0.2.2",
+                    "verb": verb,
+                    "params": params,
+                }
+            },
+        },
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    calc = body["result"]["calculation"]
+    assert expected_key in calc

@@ -36,6 +36,18 @@ PROCEDURAL_VERB_CALCULATORS = {
     "extensions.example.node_systemic_risk",
     "extensions.example.multi_intervention_impact",
     "extensions.example.intervention_ranking",
+    "extensions.example.node_criticality_ranking",
+    "extensions.example.edge_criticality_ranking",
+    "extensions.example.goal_seek_intervention",
+    "extensions.example.budgeted_intervention_optimizer",
+    "extensions.example.pareto_intervention_frontier",
+    "extensions.example.scenario_compare",
+    "extensions.example.shock_cascade_simulation",
+    "extensions.example.resilience_report",
+    "extensions.example.target_vulnerability_report",
+    "extensions.example.bottleneck_report",
+    "extensions.example.influence_matrix",
+    "extensions.example.intervention_battle",
 }
 
 SUPPORTED_VERB_CALCULATORS = STATIC_VERB_CALCULATORS | PROCEDURAL_VERB_CALCULATORS
@@ -378,6 +390,289 @@ def _calculate_verb_result_toy(parsed: ParsedCAPRequest) -> dict[str, Any]:
             min_effect_threshold=min_effect_threshold,
         )
 
+    if verb == "extensions.example.node_criticality_ranking":
+        stress_delta = coerce_float(params.get("stress_delta"), default=1.0)
+        top_k = coerce_int(params.get("top_k"), default=5, minimum=1)
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        raw_candidates = params.get("candidate_nodes")
+        if raw_candidates is None:
+            candidate_nodes = None
+        elif isinstance(raw_candidates, str):
+            candidate_nodes = [raw_candidates]
+        elif isinstance(raw_candidates, list):
+            candidate_nodes = [item for item in raw_candidates if isinstance(item, str)]
+        else:
+            return {
+                "status": "invalid_request",
+                "message": "`params.candidate_nodes` must be a string array when provided.",
+            }
+        return toy_graph.node_criticality_ranking_report(
+            candidate_nodes=candidate_nodes,
+            stress_delta=stress_delta,
+            top_k=top_k,
+            min_effect_threshold=min_effect_threshold,
+        )
+
+    if verb == "extensions.example.edge_criticality_ranking":
+        top_k = coerce_int(params.get("top_k"), default=5, minimum=1)
+        return toy_graph.edge_criticality_ranking_report(top_k=top_k)
+
+    if verb == "extensions.example.goal_seek_intervention":
+        outcome_node = params.get("outcome_node")
+        if not isinstance(outcome_node, str) or not outcome_node:
+            return {
+                "status": "invalid_request",
+                "message": "`params.outcome_node` is required and must be a string.",
+            }
+        target_outcome_change = coerce_float(params.get("target_outcome_change"), default=1.0)
+        max_plans = coerce_int(params.get("max_plans"), default=5, minimum=1)
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        raw_candidates = params.get("candidate_nodes")
+        if raw_candidates is None:
+            candidate_nodes = None
+        elif isinstance(raw_candidates, str):
+            candidate_nodes = [raw_candidates]
+        elif isinstance(raw_candidates, list):
+            candidate_nodes = [item for item in raw_candidates if isinstance(item, str)]
+        else:
+            return {
+                "status": "invalid_request",
+                "message": "`params.candidate_nodes` must be a string array when provided.",
+            }
+        return toy_graph.goal_seek_intervention_report(
+            outcome_node,
+            target_outcome_change,
+            candidate_nodes=candidate_nodes,
+            max_plans=max_plans,
+            min_effect_threshold=min_effect_threshold,
+        )
+
+    if verb == "extensions.example.budgeted_intervention_optimizer":
+        outcome_node = params.get("outcome_node")
+        if not isinstance(outcome_node, str) or not outcome_node:
+            return {
+                "status": "invalid_request",
+                "message": "`params.outcome_node` is required and must be a string.",
+            }
+        budget = coerce_float(params.get("budget"), default=1.0)
+        objective = str(params.get("objective", "increase"))
+        max_allocations = coerce_int(params.get("max_allocations"), default=3, minimum=1)
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        raw_candidates = params.get("candidate_nodes")
+        if raw_candidates is None:
+            candidate_nodes = None
+        elif isinstance(raw_candidates, str):
+            candidate_nodes = [raw_candidates]
+        elif isinstance(raw_candidates, list):
+            candidate_nodes = [item for item in raw_candidates if isinstance(item, str)]
+        else:
+            return {
+                "status": "invalid_request",
+                "message": "`params.candidate_nodes` must be a string array when provided.",
+            }
+        return toy_graph.budgeted_intervention_optimizer_report(
+            outcome_node,
+            budget,
+            objective=objective,
+            candidate_nodes=candidate_nodes,
+            max_allocations=max_allocations,
+            min_effect_threshold=min_effect_threshold,
+        )
+
+    if verb == "extensions.example.pareto_intervention_frontier":
+        outcome_node = params.get("outcome_node")
+        if not isinstance(outcome_node, str) or not outcome_node:
+            return {
+                "status": "invalid_request",
+                "message": "`params.outcome_node` is required and must be a string.",
+            }
+        intervention_delta = coerce_float(params.get("intervention_delta"), default=1.0)
+        objective = str(params.get("objective", "increase"))
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        raw_candidates = params.get("candidate_nodes")
+        if raw_candidates is None:
+            candidate_nodes = None
+        elif isinstance(raw_candidates, str):
+            candidate_nodes = [raw_candidates]
+        elif isinstance(raw_candidates, list):
+            candidate_nodes = [item for item in raw_candidates if isinstance(item, str)]
+        else:
+            return {
+                "status": "invalid_request",
+                "message": "`params.candidate_nodes` must be a string array when provided.",
+            }
+        return toy_graph.pareto_intervention_frontier_report(
+            outcome_node,
+            intervention_delta,
+            objective=objective,
+            candidate_nodes=candidate_nodes,
+            min_effect_threshold=min_effect_threshold,
+        )
+
+    if verb == "extensions.example.scenario_compare":
+        raw_scenarios = params.get("scenarios")
+        if not isinstance(raw_scenarios, list) or not raw_scenarios:
+            return {
+                "status": "invalid_request",
+                "message": "`params.scenarios` is required and must be a non-empty array.",
+            }
+        scenarios = [item for item in raw_scenarios if isinstance(item, dict)]
+        if not scenarios:
+            return {
+                "status": "invalid_request",
+                "message": "`params.scenarios` must contain scenario objects.",
+            }
+        raw_outcome_node = params.get("outcome_node")
+        outcome_node = raw_outcome_node if isinstance(raw_outcome_node, str) else None
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        return toy_graph.scenario_compare_report(
+            scenarios,
+            outcome_node=outcome_node,
+            min_effect_threshold=min_effect_threshold,
+        )
+
+    if verb == "extensions.example.shock_cascade_simulation":
+        target_node = params.get("target_node")
+        if not isinstance(target_node, str) or not target_node:
+            return {
+                "status": "invalid_request",
+                "message": "`params.target_node` is required and must be a string.",
+            }
+        shock_delta = coerce_float(params.get("shock_delta"), default=1.0)
+        steps = coerce_int(params.get("steps"), default=3, minimum=0)
+        damping = coerce_float(params.get("damping"), default=0.6)
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        noise_scale = max(
+            0.0,
+            coerce_float(params.get("noise_scale"), default=0.0),
+        )
+        raw_seed = params.get("random_seed")
+        random_seed = coerce_int(raw_seed, default=0, minimum=0) if raw_seed is not None else None
+        return toy_graph.shock_cascade_simulation_report(
+            target_node,
+            shock_delta,
+            steps=steps,
+            damping=damping,
+            min_effect_threshold=min_effect_threshold,
+            noise_scale=noise_scale,
+            random_seed=random_seed,
+        )
+
+    if verb == "extensions.example.resilience_report":
+        top_k = coerce_int(params.get("top_k"), default=5, minimum=1)
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        return toy_graph.resilience_report(
+            top_k=top_k,
+            min_effect_threshold=min_effect_threshold,
+        )
+
+    if verb == "extensions.example.target_vulnerability_report":
+        target_node = params.get("target_node")
+        if not isinstance(target_node, str) or not target_node:
+            return {
+                "status": "invalid_request",
+                "message": "`params.target_node` is required and must be a string.",
+            }
+        shock_delta = coerce_float(params.get("shock_delta"), default=1.0)
+        top_k = coerce_int(params.get("top_k"), default=5, minimum=1)
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        raw_sources = params.get("candidate_sources")
+        if raw_sources is None:
+            candidate_sources = None
+        elif isinstance(raw_sources, str):
+            candidate_sources = [raw_sources]
+        elif isinstance(raw_sources, list):
+            candidate_sources = [item for item in raw_sources if isinstance(item, str)]
+        else:
+            return {
+                "status": "invalid_request",
+                "message": "`params.candidate_sources` must be a string array when provided.",
+            }
+        return toy_graph.target_vulnerability_report(
+            target_node,
+            shock_delta=shock_delta,
+            candidate_sources=candidate_sources,
+            top_k=top_k,
+            min_effect_threshold=min_effect_threshold,
+        )
+
+    if verb == "extensions.example.bottleneck_report":
+        top_k = coerce_int(params.get("top_k"), default=5, minimum=1)
+        max_paths_per_pair = coerce_int(params.get("max_paths_per_pair"), default=20, minimum=1)
+        return toy_graph.bottleneck_report(
+            top_k=top_k,
+            max_paths_per_pair=max_paths_per_pair,
+        )
+
+    if verb == "extensions.example.influence_matrix":
+        raw_node_ids = params.get("node_ids")
+        if raw_node_ids is None:
+            node_ids = None
+        elif isinstance(raw_node_ids, str):
+            node_ids = [raw_node_ids]
+        elif isinstance(raw_node_ids, list):
+            node_ids = [item for item in raw_node_ids if isinstance(item, str)]
+        else:
+            return {
+                "status": "invalid_request",
+                "message": "`params.node_ids` must be a string array when provided.",
+            }
+        return toy_graph.influence_matrix_report(node_ids=node_ids)
+
+    if verb == "extensions.example.intervention_battle":
+        outcome_node = params.get("outcome_node")
+        if not isinstance(outcome_node, str) or not outcome_node:
+            return {
+                "status": "invalid_request",
+                "message": "`params.outcome_node` is required and must be a string.",
+            }
+        plan_a = params.get("plan_a")
+        plan_b = params.get("plan_b")
+        if not isinstance(plan_a, dict) or not isinstance(plan_b, dict):
+            return {
+                "status": "invalid_request",
+                "message": "`params.plan_a` and `params.plan_b` are required objects.",
+            }
+        min_effect_threshold = max(
+            0.0,
+            coerce_float(params.get("min_effect_threshold"), default=0.0001),
+        )
+        disruption_penalty = max(
+            0.0,
+            coerce_float(params.get("disruption_penalty"), default=1.0),
+        )
+        return toy_graph.intervention_battle_report(
+            outcome_node,
+            plan_a,
+            plan_b,
+            min_effect_threshold=min_effect_threshold,
+            disruption_penalty=disruption_penalty,
+        )
+
     if verb == "traverse.parents":
         node_id = require_node_param(params, "node_id")
         if not is_known_node(node_id):
@@ -593,6 +888,42 @@ def _verb_description(verb: str) -> str:
         ),
         "extensions.example.intervention_ranking": (
             "Rank intervention candidates for an outcome by effect size and aggregate impact."
+        ),
+        "extensions.example.node_criticality_ranking": (
+            "Rank nodes by systemic criticality using stress propagation and structure-based indicators."
+        ),
+        "extensions.example.edge_criticality_ranking": (
+            "Rank edges by impact on pairwise influence and outcome sensitivity under edge removal."
+        ),
+        "extensions.example.goal_seek_intervention": (
+            "Suggest intervention plans required to hit a target outcome change."
+        ),
+        "extensions.example.budgeted_intervention_optimizer": (
+            "Allocate a fixed intervention budget across candidates to optimize outcome change."
+        ),
+        "extensions.example.pareto_intervention_frontier": (
+            "Return non-dominated intervention candidates over outcome impact vs. market disruption."
+        ),
+        "extensions.example.scenario_compare": (
+            "Compare multi-intervention scenarios across outcome impact and disruption metrics."
+        ),
+        "extensions.example.shock_cascade_simulation": (
+            "Simulate stepwise cascade propagation after a node shock."
+        ),
+        "extensions.example.resilience_report": (
+            "Estimate graph resilience under node and edge failure stress tests."
+        ),
+        "extensions.example.target_vulnerability_report": (
+            "Profile target vulnerability to upstream shocks and source concentration."
+        ),
+        "extensions.example.bottleneck_report": (
+            "Identify nodes and edges that appear most frequently across directed paths."
+        ),
+        "extensions.example.influence_matrix": (
+            "Return pairwise total-path influence matrix and in/out strength summaries."
+        ),
+        "extensions.example.intervention_battle": (
+            "Compare two intervention plans head-to-head with outcome and disruption scoring."
         ),
         "extensions.example.dataset_density": (
             "Synthetic dataset graph statistics including density, sparsity, and degree summaries."

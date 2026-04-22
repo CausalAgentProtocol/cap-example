@@ -171,6 +171,217 @@ def _build_calculation_metrics(verb: str, calculation: dict[str, Any]) -> dict[s
         )
         return metrics
 
+    if verb == "extensions.example.node_criticality_ranking":
+        rankings = calculation.get("rankings", [])
+        best = rankings[0] if isinstance(rankings, list) and rankings else {}
+        metrics.update(
+            {
+                "candidate_count": calculation.get("candidate_count"),
+                "ranked_node_count": calculation.get("ranked_node_count"),
+                "best_node_id": best.get("node_id") if isinstance(best, dict) else None,
+                "best_systemic_risk_score": (
+                    best.get("systemic_risk_score") if isinstance(best, dict) else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.edge_criticality_ranking":
+        rankings = calculation.get("rankings", [])
+        best = rankings[0] if isinstance(rankings, list) and rankings else {}
+        metrics.update(
+            {
+                "edge_count": calculation.get("edge_count"),
+                "ranked_edge_count": calculation.get("ranked_edge_count"),
+                "top_edge": (
+                    (
+                        best.get("source_node_id"),
+                        best.get("target_node_id"),
+                    )
+                    if isinstance(best, dict)
+                    else None
+                ),
+                "top_influence_loss": (
+                    best.get("influence_loss") if isinstance(best, dict) else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.goal_seek_intervention":
+        best = calculation.get("best_plan", {})
+        metrics.update(
+            {
+                "outcome_known": calculation.get("outcome_known"),
+                "achievable": calculation.get("achievable"),
+                "plan_count": calculation.get("plan_count"),
+                "best_candidate_node": (
+                    best.get("candidate_node") if isinstance(best, dict) else None
+                ),
+                "best_required_delta": (
+                    best.get("required_intervention_delta") if isinstance(best, dict) else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.budgeted_intervention_optimizer":
+        impact = calculation.get("impact_summary", {})
+        metrics.update(
+            {
+                "outcome_known": calculation.get("outcome_known"),
+                "selected_candidate_count": calculation.get("selected_candidate_count"),
+                "expected_outcome_change": calculation.get("expected_outcome_change"),
+                "market_change_level": (
+                    impact.get("market_change_level") if isinstance(impact, dict) else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.pareto_intervention_frontier":
+        frontier = calculation.get("frontier", [])
+        top = frontier[0] if isinstance(frontier, list) and frontier else {}
+        metrics.update(
+            {
+                "outcome_known": calculation.get("outcome_known"),
+                "frontier_count": calculation.get("frontier_count"),
+                "top_frontier_candidate": (
+                    top.get("candidate_node") if isinstance(top, dict) else None
+                ),
+                "top_frontier_utility": top.get("utility") if isinstance(top, dict) else None,
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.scenario_compare":
+        best = calculation.get("best_by_outcome", {})
+        least_disruptive = calculation.get("least_disruptive", {})
+        metrics.update(
+            {
+                "scenario_count": calculation.get("scenario_count"),
+                "outcome_known": calculation.get("outcome_known"),
+                "best_by_outcome": best.get("name") if isinstance(best, dict) else None,
+                "least_disruptive": (
+                    least_disruptive.get("name")
+                    if isinstance(least_disruptive, dict)
+                    else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.shock_cascade_simulation":
+        metrics.update(
+            {
+                "target_known": calculation.get("target_known"),
+                "steps_executed": calculation.get("steps_executed"),
+                "affected_node_count": calculation.get("affected_node_count"),
+                "market_change_level": calculation.get("market_change_level"),
+                "max_affected_node": calculation.get("max_affected_node"),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.resilience_report":
+        metrics.update(
+            {
+                "resilience_index": calculation.get("resilience_index"),
+                "baseline_reachable_pair_count": calculation.get("baseline_reachable_pair_count"),
+                "most_fragile_node": (
+                    calculation.get("most_fragile_node", {}).get("node_id")
+                    if isinstance(calculation.get("most_fragile_node"), dict)
+                    else None
+                ),
+                "most_fragile_edge": (
+                    (
+                        calculation.get("most_fragile_edge", {}).get("source_node_id"),
+                        calculation.get("most_fragile_edge", {}).get("target_node_id"),
+                    )
+                    if isinstance(calculation.get("most_fragile_edge"), dict)
+                    else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.target_vulnerability_report":
+        rankings = calculation.get("rankings", [])
+        best = rankings[0] if isinstance(rankings, list) and rankings else {}
+        metrics.update(
+            {
+                "target_known": calculation.get("target_known"),
+                "vulnerability_source_count": calculation.get("vulnerability_source_count"),
+                "concentration_index": calculation.get("concentration_index"),
+                "top_source_node": (
+                    best.get("source_node") if isinstance(best, dict) else None
+                ),
+                "top_abs_effect_on_target": (
+                    best.get("abs_effect_on_target") if isinstance(best, dict) else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.bottleneck_report":
+        top_nodes = calculation.get("top_nodes", [])
+        top_edges = calculation.get("top_edges", [])
+        top_node = top_nodes[0] if isinstance(top_nodes, list) and top_nodes else {}
+        top_edge = top_edges[0] if isinstance(top_edges, list) and top_edges else {}
+        metrics.update(
+            {
+                "total_paths_considered": calculation.get("total_paths_considered"),
+                "top_node": top_node.get("node_id") if isinstance(top_node, dict) else None,
+                "top_edge": (
+                    (
+                        top_edge.get("source_node_id"),
+                        top_edge.get("target_node_id"),
+                    )
+                    if isinstance(top_edge, dict)
+                    else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.influence_matrix":
+        metrics.update(
+            {
+                "evaluated_node_count": calculation.get("evaluated_node_count"),
+                "strongest_source_node": (
+                    calculation.get("strongest_source_node", {}).get("node_id")
+                    if isinstance(calculation.get("strongest_source_node"), dict)
+                    else None
+                ),
+                "strongest_target_node": (
+                    calculation.get("strongest_target_node", {}).get("node_id")
+                    if isinstance(calculation.get("strongest_target_node"), dict)
+                    else None
+                ),
+            }
+        )
+        return metrics
+
+    if verb == "extensions.example.intervention_battle":
+        combined = calculation.get("combined", {})
+        metrics.update(
+            {
+                "outcome_known": calculation.get("outcome_known"),
+                "winner": calculation.get("winner"),
+                "combined_market_change_level": (
+                    combined.get("market_change_level")
+                    if isinstance(combined, dict)
+                    else None
+                ),
+                "combined_affected_node_count": (
+                    combined.get("affected_node_count")
+                    if isinstance(combined, dict)
+                    else None
+                ),
+            }
+        )
+        return metrics
+
     if verb in {"traverse.parents", "traverse.children"}:
         nodes = calculation.get("nodes", [])
         metrics.update({"node_count": len(nodes) if isinstance(nodes, list) else None})

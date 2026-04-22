@@ -602,6 +602,73 @@ class InterventionRankingResponse(BaseModel):
     result: InterventionRankingResult
 
 
+class GenericExampleExtensionRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str
+    params: dict = Field(default_factory=dict)
+
+
+class GenericExampleExtensionResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: dict
+
+
+class NodeCriticalityRankingRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.node_criticality_ranking"
+
+
+class EdgeCriticalityRankingRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.edge_criticality_ranking"
+
+
+class GoalSeekInterventionRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.goal_seek_intervention"
+
+
+class BudgetedInterventionOptimizerRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.budgeted_intervention_optimizer"
+
+
+class ParetoInterventionFrontierRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.pareto_intervention_frontier"
+
+
+class ScenarioCompareRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.scenario_compare"
+
+
+class ShockCascadeSimulationRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.shock_cascade_simulation"
+
+
+class ResilienceReportRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.resilience_report"
+
+
+class TargetVulnerabilityReportRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.target_vulnerability_report"
+
+
+class BottleneckReportRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.bottleneck_report"
+
+
+class InfluenceMatrixRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.influence_matrix"
+
+
+class InterventionBattleRequest(GenericExampleExtensionRequest):
+    verb: str = "extensions.example.intervention_battle"
+
+
 class VerbCatalogParams(BaseModel):
     detail: str = "full"
     include_examples: bool = True
@@ -701,6 +768,38 @@ registry = CAPVerbRegistry()
 
 def get_service(request: Request) -> ExampleService:
     return cast(ExampleService, request.app.state.cap_service)
+
+
+def _coerce_float(value: object, default: float) -> float:
+    if value is None:
+        return default
+    try:
+        return float(value)
+    except (TypeError, ValueError):
+        return default
+
+
+def _coerce_int(value: object, default: int, minimum: int) -> int:
+    if value is None:
+        return default
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(minimum, parsed)
+
+
+def _parse_optional_str_list(value: object, param_name: str) -> tuple[list[str] | None, dict | None]:
+    if value is None:
+        return None, None
+    if isinstance(value, str):
+        return [value], None
+    if isinstance(value, list):
+        return [item for item in value if isinstance(item, str)], None
+    return None, {
+        "status": "invalid_request",
+        "message": f"`params.{param_name}` must be a string array when provided.",
+    }
 
 
 @registry.core(META_CAPABILITIES_CONTRACT)
@@ -1138,6 +1237,491 @@ def intervention_ranking(payload: InterventionRankingRequest, request: Request) 
 
 @registry.extension(
     namespace="example",
+    name="node_criticality_ranking",
+    request_model=NodeCriticalityRankingRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Rank nodes by systemic criticality under stress propagation, including "
+        "risk score, breadth, and structural indicators."
+    ),
+)
+def node_criticality_ranking(
+    payload: NodeCriticalityRankingRequest,
+    request: Request,
+) -> dict:
+    del request
+    params = payload.params
+    candidate_nodes, error = _parse_optional_str_list(params.get("candidate_nodes"), "candidate_nodes")
+    if error:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "node-criticality-ranking",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": error,
+        }
+    result = toy_graph.node_criticality_ranking_report(
+        candidate_nodes=candidate_nodes,
+        stress_delta=_coerce_float(params.get("stress_delta"), 1.0),
+        top_k=_coerce_int(params.get("top_k"), default=5, minimum=1),
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "node-criticality-ranking",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="edge_criticality_ranking",
+    request_model=EdgeCriticalityRankingRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Rank edges by influence loss under edge removal, highlighting structural bottlenecks."
+    ),
+)
+def edge_criticality_ranking(payload: EdgeCriticalityRankingRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    result = toy_graph.edge_criticality_ranking_report(
+        top_k=_coerce_int(params.get("top_k"), default=5, minimum=1),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "edge-criticality-ranking",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="goal_seek_intervention",
+    request_model=GoalSeekInterventionRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Propose intervention plans that can achieve a requested outcome delta with "
+        "estimated impact tradeoffs."
+    ),
+)
+def goal_seek_intervention(payload: GoalSeekInterventionRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    outcome_node = params.get("outcome_node")
+    if not isinstance(outcome_node, str) or not outcome_node:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "goal-seek-intervention",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {"message": "`params.outcome_node` is required and must be a string."},
+        }
+    candidate_nodes, error = _parse_optional_str_list(params.get("candidate_nodes"), "candidate_nodes")
+    if error:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "goal-seek-intervention",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": error,
+        }
+    result = toy_graph.goal_seek_intervention_report(
+        outcome_node,
+        _coerce_float(params.get("target_outcome_change"), 1.0),
+        candidate_nodes=candidate_nodes,
+        max_plans=_coerce_int(params.get("max_plans"), default=5, minimum=1),
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "goal-seek-intervention",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="budgeted_intervention_optimizer",
+    request_model=BudgetedInterventionOptimizerRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Optimize intervention allocation under a fixed budget to improve or dampen "
+        "a target outcome."
+    ),
+)
+def budgeted_intervention_optimizer(
+    payload: BudgetedInterventionOptimizerRequest,
+    request: Request,
+) -> dict:
+    del request
+    params = payload.params
+    outcome_node = params.get("outcome_node")
+    if not isinstance(outcome_node, str) or not outcome_node:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "budgeted-intervention-optimizer",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {"message": "`params.outcome_node` is required and must be a string."},
+        }
+    candidate_nodes, error = _parse_optional_str_list(params.get("candidate_nodes"), "candidate_nodes")
+    if error:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "budgeted-intervention-optimizer",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": error,
+        }
+    result = toy_graph.budgeted_intervention_optimizer_report(
+        outcome_node,
+        _coerce_float(params.get("budget"), 1.0),
+        objective=str(params.get("objective", "increase")),
+        candidate_nodes=candidate_nodes,
+        max_allocations=_coerce_int(params.get("max_allocations"), default=3, minimum=1),
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "budgeted-intervention-optimizer",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="pareto_intervention_frontier",
+    request_model=ParetoInterventionFrontierRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Return non-dominated intervention candidates on impact-vs-disruption frontier."
+    ),
+)
+def pareto_intervention_frontier(
+    payload: ParetoInterventionFrontierRequest,
+    request: Request,
+) -> dict:
+    del request
+    params = payload.params
+    outcome_node = params.get("outcome_node")
+    if not isinstance(outcome_node, str) or not outcome_node:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "pareto-intervention-frontier",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {"message": "`params.outcome_node` is required and must be a string."},
+        }
+    candidate_nodes, error = _parse_optional_str_list(params.get("candidate_nodes"), "candidate_nodes")
+    if error:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "pareto-intervention-frontier",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": error,
+        }
+    result = toy_graph.pareto_intervention_frontier_report(
+        outcome_node,
+        _coerce_float(params.get("intervention_delta"), 1.0),
+        objective=str(params.get("objective", "increase")),
+        candidate_nodes=candidate_nodes,
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "pareto-intervention-frontier",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="scenario_compare",
+    request_model=ScenarioCompareRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Compare multiple intervention scenarios on outcome lift and aggregate disruption."
+    ),
+)
+def scenario_compare(payload: ScenarioCompareRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    raw_scenarios = params.get("scenarios")
+    if not isinstance(raw_scenarios, list) or not raw_scenarios:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "scenario-compare",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {
+                "message": "`params.scenarios` is required and must be a non-empty array."
+            },
+        }
+    scenarios = [item for item in raw_scenarios if isinstance(item, dict)]
+    if not scenarios:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "scenario-compare",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {"message": "`params.scenarios` must contain scenario objects."},
+        }
+    outcome_node = params.get("outcome_node") if isinstance(params.get("outcome_node"), str) else None
+    result = toy_graph.scenario_compare_report(
+        scenarios,
+        outcome_node=outcome_node,
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "scenario-compare",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="shock_cascade_simulation",
+    request_model=ShockCascadeSimulationRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Simulate multi-step shock propagation from a target node with optional damping/noise."
+    ),
+)
+def shock_cascade_simulation(
+    payload: ShockCascadeSimulationRequest,
+    request: Request,
+) -> dict:
+    del request
+    params = payload.params
+    target_node = params.get("target_node")
+    if not isinstance(target_node, str) or not target_node:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "shock-cascade-simulation",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {"message": "`params.target_node` is required and must be a string."},
+        }
+    random_seed = (
+        _coerce_int(params.get("random_seed"), default=0, minimum=0)
+        if params.get("random_seed") is not None
+        else None
+    )
+    result = toy_graph.shock_cascade_simulation_report(
+        target_node,
+        _coerce_float(params.get("shock_delta"), 1.0),
+        steps=_coerce_int(params.get("steps"), default=3, minimum=0),
+        damping=_coerce_float(params.get("damping"), 0.6),
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+        noise_scale=max(0.0, _coerce_float(params.get("noise_scale"), 0.0)),
+        random_seed=random_seed,
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "shock-cascade-simulation",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="resilience_report",
+    request_model=ResilienceReportRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Estimate graph resilience under single-node and single-edge failure stress tests."
+    ),
+)
+def resilience_report(payload: ResilienceReportRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    result = toy_graph.resilience_report(
+        top_k=_coerce_int(params.get("top_k"), default=5, minimum=1),
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "resilience-report",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="target_vulnerability_report",
+    request_model=TargetVulnerabilityReportRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Rank upstream source nodes by vulnerability contribution to a target node."
+    ),
+)
+def target_vulnerability_report(
+    payload: TargetVulnerabilityReportRequest,
+    request: Request,
+) -> dict:
+    del request
+    params = payload.params
+    target_node = params.get("target_node")
+    if not isinstance(target_node, str) or not target_node:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "target-vulnerability-report",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {"message": "`params.target_node` is required and must be a string."},
+        }
+    candidate_sources, error = _parse_optional_str_list(
+        params.get("candidate_sources"),
+        "candidate_sources",
+    )
+    if error:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "target-vulnerability-report",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": error,
+        }
+    result = toy_graph.target_vulnerability_report(
+        target_node,
+        shock_delta=_coerce_float(params.get("shock_delta"), 1.0),
+        candidate_sources=candidate_sources,
+        top_k=_coerce_int(params.get("top_k"), default=5, minimum=1),
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "target-vulnerability-report",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="bottleneck_report",
+    request_model=BottleneckReportRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Identify structural bottleneck nodes/edges with highest path participation."
+    ),
+)
+def bottleneck_report(payload: BottleneckReportRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    result = toy_graph.bottleneck_report(
+        top_k=_coerce_int(params.get("top_k"), default=5, minimum=1),
+        max_paths_per_pair=_coerce_int(params.get("max_paths_per_pair"), default=20, minimum=1),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "bottleneck-report",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="influence_matrix",
+    request_model=InfluenceMatrixRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Return a full source-target influence matrix with in/out strength summaries."
+    ),
+)
+def influence_matrix(payload: InfluenceMatrixRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    node_ids, error = _parse_optional_str_list(params.get("node_ids"), "node_ids")
+    if error:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "influence-matrix",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": error,
+        }
+    result = toy_graph.influence_matrix_report(node_ids=node_ids)
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "influence-matrix",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
+    name="intervention_battle",
+    request_model=InterventionBattleRequest,
+    response_model=GenericExampleExtensionResponse,
+    description=(
+        "Compare two intervention plans head-to-head on outcome impact and market disruption."
+    ),
+)
+def intervention_battle(payload: InterventionBattleRequest, request: Request) -> dict:
+    del request
+    params = payload.params
+    outcome_node = params.get("outcome_node")
+    if not isinstance(outcome_node, str) or not outcome_node:
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "intervention-battle",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {"message": "`params.outcome_node` is required and must be a string."},
+        }
+    plan_a = params.get("plan_a")
+    plan_b = params.get("plan_b")
+    if not isinstance(plan_a, dict) or not isinstance(plan_b, dict):
+        return {
+            "cap_version": payload.cap_version,
+            "request_id": payload.request_id or "intervention-battle",
+            "verb": payload.verb,
+            "status": "invalid_request",
+            "result": {"message": "`params.plan_a` and `params.plan_b` are required objects."},
+        }
+    result = toy_graph.intervention_battle_report(
+        outcome_node,
+        plan_a,
+        plan_b,
+        min_effect_threshold=max(0.0, _coerce_float(params.get("min_effect_threshold"), 0.0001)),
+        disruption_penalty=max(0.0, _coerce_float(params.get("disruption_penalty"), 1.0)),
+    )
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "intervention-battle",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="example",
     name="verb_catalog",
     request_model=VerbCatalogRequest,
     response_model=VerbCatalogResponse,
@@ -1242,6 +1826,98 @@ def _example_request_for_verb(verb: str) -> dict:
             "candidate_nodes": ["marketing_spend", "product_quality", "demand"],
             "top_k": 3,
             "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.node_criticality_ranking": {
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand", "retention"],
+            "stress_delta": 1.0,
+            "top_k": 3,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.edge_criticality_ranking": {
+            "top_k": 3,
+        },
+        "extensions.example.goal_seek_intervention": {
+            "outcome_node": "revenue",
+            "target_outcome_change": 3.0,
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand"],
+            "max_plans": 3,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.budgeted_intervention_optimizer": {
+            "outcome_node": "revenue",
+            "budget": 2.0,
+            "objective": "increase",
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand"],
+            "max_allocations": 2,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.pareto_intervention_frontier": {
+            "outcome_node": "revenue",
+            "intervention_delta": 1.0,
+            "objective": "increase",
+            "candidate_nodes": ["marketing_spend", "product_quality", "demand", "retention"],
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.scenario_compare": {
+            "outcome_node": "revenue",
+            "scenarios": [
+                {
+                    "name": "growth_push",
+                    "interventions": [
+                        {"target_node": "marketing_spend", "intervention_delta": 1.5},
+                        {"target_node": "product_quality", "intervention_delta": 0.5},
+                    ],
+                },
+                {
+                    "name": "quality_focus",
+                    "interventions": [
+                        {"target_node": "product_quality", "intervention_delta": 1.5},
+                    ],
+                },
+            ],
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.shock_cascade_simulation": {
+            "target_node": "product_quality",
+            "shock_delta": 1.0,
+            "steps": 3,
+            "damping": 0.6,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.resilience_report": {
+            "top_k": 3,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.target_vulnerability_report": {
+            "target_node": "revenue",
+            "shock_delta": 1.0,
+            "candidate_sources": ["marketing_spend", "product_quality", "demand", "retention"],
+            "top_k": 3,
+            "min_effect_threshold": 0.0001,
+        },
+        "extensions.example.bottleneck_report": {
+            "top_k": 3,
+            "max_paths_per_pair": 20,
+        },
+        "extensions.example.influence_matrix": {
+            "node_ids": ["marketing_spend", "product_quality", "demand", "retention", "revenue"],
+        },
+        "extensions.example.intervention_battle": {
+            "outcome_node": "revenue",
+            "plan_a": {
+                "name": "acquisition_heavy",
+                "interventions": [
+                    {"target_node": "marketing_spend", "intervention_delta": 1.5},
+                ],
+            },
+            "plan_b": {
+                "name": "product_heavy",
+                "interventions": [
+                    {"target_node": "product_quality", "intervention_delta": 1.0},
+                ],
+            },
+            "min_effect_threshold": 0.0001,
+            "disruption_penalty": 1.0,
         },
         "extensions.example.dataset_density": {},
         "extensions.example.verb_catalog": {"detail": "compact", "include_examples": True},

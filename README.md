@@ -269,6 +269,18 @@ curl -s -X POST http://127.0.0.1:8000/cap -H 'Content-Type: application/json' -d
 | `extensions.example.node_systemic_risk` | extension | `node_id`, optional `stress_delta`, optional `min_effect_threshold` |
 | `extensions.example.multi_intervention_impact` | extension | `interventions[]` with `target_node`, optional `intervention_delta`, optional `min_effect_threshold` |
 | `extensions.example.intervention_ranking` | extension | `outcome_node`, optional `intervention_delta`, optional `candidate_nodes`, optional `top_k`, optional `min_effect_threshold` |
+| `extensions.example.node_criticality_ranking` | extension | optional `candidate_nodes`, optional `stress_delta`, optional `top_k`, optional `min_effect_threshold` |
+| `extensions.example.edge_criticality_ranking` | extension | optional `top_k` |
+| `extensions.example.goal_seek_intervention` | extension | `outcome_node`, `target_outcome_change`, optional `candidate_nodes`, optional `max_plans`, optional `min_effect_threshold` |
+| `extensions.example.budgeted_intervention_optimizer` | extension | `outcome_node`, `budget`, optional `objective`, optional `candidate_nodes`, optional `max_allocations`, optional `min_effect_threshold` |
+| `extensions.example.pareto_intervention_frontier` | extension | `outcome_node`, optional `intervention_delta`, optional `objective`, optional `candidate_nodes`, optional `min_effect_threshold` |
+| `extensions.example.scenario_compare` | extension | `scenarios[]` with `interventions[]`, optional `outcome_node`, optional `min_effect_threshold` |
+| `extensions.example.shock_cascade_simulation` | extension | `target_node`, optional `shock_delta`, optional `steps`, optional `damping`, optional `min_effect_threshold` |
+| `extensions.example.resilience_report` | extension | optional `top_k`, optional `min_effect_threshold` |
+| `extensions.example.target_vulnerability_report` | extension | `target_node`, optional `shock_delta`, optional `candidate_sources`, optional `top_k`, optional `min_effect_threshold` |
+| `extensions.example.bottleneck_report` | extension | optional `top_k`, optional `max_paths_per_pair` |
+| `extensions.example.influence_matrix` | extension | optional `node_ids` |
+| `extensions.example.intervention_battle` | extension | `outcome_node`, `plan_a`, `plan_b`, optional `min_effect_threshold`, optional `disruption_penalty` |
 | `extensions.example.dataset_density` | extension | none |
 | `extensions.example.verb_catalog` | extension | optional `detail`, `include_examples` |
 | `extensions.market.parse_request` | extension | `params.request` |

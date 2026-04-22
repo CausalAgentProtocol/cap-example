@@ -57,6 +57,33 @@ def extract_node_ids(params: dict[str, Any]) -> list[str]:
                 if isinstance(target, str):
                     nodes.append(target)
             continue
+        if key in {"plan_a", "plan_b"} and isinstance(value, dict):
+            plan_interventions = value.get("interventions")
+            if isinstance(plan_interventions, list):
+                for row in plan_interventions:
+                    if not isinstance(row, dict):
+                        continue
+                    target = row.get("target_node")
+                    if isinstance(target, str):
+                        nodes.append(target)
+            continue
+        if key == "scenarios" and isinstance(value, list):
+            for scenario in value:
+                if not isinstance(scenario, dict):
+                    continue
+                scenario_interventions = scenario.get("interventions")
+                if not isinstance(scenario_interventions, list):
+                    continue
+                for row in scenario_interventions:
+                    if not isinstance(row, dict):
+                        continue
+                    target = row.get("target_node")
+                    if isinstance(target, str):
+                        nodes.append(target)
+            continue
+        if key == "candidate_sources" and isinstance(value, list):
+            nodes.extend(item for item in value if isinstance(item, str))
+            continue
         if key.endswith("_node") or key.endswith("_node_id"):
             if isinstance(value, str):
                 nodes.append(value)
