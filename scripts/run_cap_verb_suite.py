@@ -20,6 +20,9 @@ class Case:
     payload: dict[str, Any]
 
 
+SUITE_CAP_VERSION = "0.2.2"
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
@@ -63,17 +66,32 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Print each full response JSON to stdout while running.",
     )
+    parser.add_argument(
+        "--cap-version",
+        default="auto",
+        help=(
+            "CAP request version to send. Use `auto` to detect from "
+            "/.well-known/cap.json (default: auto)."
+        ),
+    )
     return parser.parse_args()
 
 
 def main() -> None:
+    global SUITE_CAP_VERSION
     args = parse_args()
     base_url = args.base_url.rstrip("/")
     endpoint = f"{base_url}/cap"
     run_id = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
+    SUITE_CAP_VERSION = resolve_cap_version(
+        base_url=base_url,
+        timeout_seconds=args.timeout_seconds,
+        requested=args.cap_version,
+    )
 
     cases = build_cases(args)
     print(f"[suite] endpoint={endpoint}")
+    print(f"[suite] cap_version={SUITE_CAP_VERSION}")
     print(f"[suite] cases={len(cases)}")
 
     results: list[dict[str, Any]] = []
@@ -105,6 +123,29 @@ def main() -> None:
     json_path, md_path = write_reports(report=report, output_dir=Path(args.output_dir))
     print(f"[suite] JSON report: {json_path}")
     print(f"[suite] Markdown report: {md_path}")
+
+
+def resolve_cap_version(
+    *,
+    base_url: str,
+    timeout_seconds: float,
+    requested: str,
+) -> str:
+    if requested != "auto":
+        return requested
+    try:
+        response = httpx.get(f"{base_url}/.well-known/cap.json", timeout=timeout_seconds)
+        response.raise_for_status()
+        payload = response.json()
+    except Exception:  # noqa: BLE001
+        return "0.3.0"
+
+    if isinstance(payload, dict):
+        for key in ("cap_spec_version", "cap_version"):
+            value = payload.get(key)
+            if isinstance(value, str) and value:
+                return value
+    return "0.3.0"
 
 
 def build_cases(args: argparse.Namespace) -> list[Case]:
@@ -528,7 +569,7 @@ def build_cases(args: argparse.Namespace) -> list[Case]:
                 "verb": "extensions.market.parse_request",
                 "params": {
                     "request": {
-                        "cap_version": "0.2.2",
+                        "cap_version": SUITE_CAP_VERSION,
                         "verb": "graph.neighbors",
                         "params": {"node_id": args.market_node_id, "scope": "parents"},
                     }
@@ -544,12 +585,12 @@ def build_cases(args: argparse.Namespace) -> list[Case]:
                 "params": {
                     "requests": [
                         {
-                            "cap_version": "0.2.2",
+                            "cap_version": SUITE_CAP_VERSION,
                             "verb": "observe.predict",
                             "params": {"target_node": args.market_target_node_id},
                         },
                         {
-                            "cap_version": "0.2.2",
+                            "cap_version": SUITE_CAP_VERSION,
                             "verb": "graph.neighbors",
                             "params": {
                                 "node_id": args.market_node_id,
@@ -814,7 +855,7 @@ def build_cases(args: argparse.Namespace) -> list[Case]:
             "verb": "extensions.market.interpret_request",
             "params": {
                 "request": {
-                    "cap_version": "0.2.2",
+                    "cap_version": SUITE_CAP_VERSION,
                     "verb": embedded_verb,
                 }
             },
@@ -839,7 +880,7 @@ def _case(
     payload: dict[str, Any],
 ) -> Case:
     body = {
-        "cap_version": "0.2.2",
+        "cap_version": SUITE_CAP_VERSION,
         "request_id": f"{name}-{int(time.time() * 1000)}",
         **payload,
     }

@@ -105,6 +105,7 @@ class ExampleService:
             ),
             endpoint=f"{self.public_base_url.rstrip('/')}/cap",
             conformance_level=2,
+            conformance_name="Intervene",
             supported_verbs=supported_verbs,
             causal_engine=CapabilityCausalEngine(
                 family="toy_scm",
