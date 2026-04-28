@@ -446,55 +446,6 @@
           "purpose": "Return usage catalog for mounted CAP verbs."
         }
       ]
-    },
-    "extensions.market.parse_request": {
-      "runtime_owner": "cap-example",
-      "functions": [
-        {
-          "module": "example_cap_server.market_pipeline.parser",
-          "function": "parse_cap_request",
-          "purpose": "Parse embedded CAP request and extract node ids."
-        },
-        {
-          "module": "example_cap_server.integrations.abel_graph_computer_adapter",
-          "function": "get_cap_function_plan",
-          "purpose": "Return function plan entry for parsed verb."
-        }
-      ]
-    },
-    "extensions.market.batch_execute": {
-      "runtime_owner": "cap-example",
-      "pipeline": [
-        "parse",
-        "graph_operations",
-        "calculation",
-        "postprocess",
-        "analysis"
-      ],
-      "functions": [
-        {
-          "module": "example_cap_server.main",
-          "function": "market_batch_execute",
-          "purpose": "Run multiple embedded CAP requests via toy graph pipeline."
-        }
-      ]
-    },
-    "extensions.market.interpret_request": {
-      "runtime_owner": "cap-example",
-      "pipeline": [
-        "parse",
-        "graph_operations",
-        "calculation",
-        "postprocess",
-        "analysis"
-      ],
-      "functions": [
-        {
-          "module": "example_cap_server.main",
-          "function": "market_interpret_request",
-          "purpose": "Run staged toy-graph pipeline for one embedded CAP request."
-        }
-      ]
     }
   }
 }
