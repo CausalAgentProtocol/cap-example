@@ -561,8 +561,317 @@ def build_cases(args: argparse.Namespace) -> list[Case]:
             "extensions.example.verb_catalog",
             {"verb": "extensions.example.verb_catalog", "params": {"detail": "compact"}},
         ),
+        _case(
+            "direct-extension-market-parse-request",
+            "direct",
+            "extensions.market.parse_request",
+            {
+                "verb": "extensions.market.parse_request",
+                "params": {
+                    "request": {
+                        "cap_version": SUITE_CAP_VERSION,
+                        "verb": "graph.neighbors",
+                        "params": {"node_id": args.market_node_id, "scope": "parents"},
+                    }
+                },
+            },
+        ),
+        _case(
+            "direct-extension-market-batch-execute",
+            "direct",
+            "extensions.market.batch_execute",
+            {
+                "verb": "extensions.market.batch_execute",
+                "params": {
+                    "requests": [
+                        {
+                            "cap_version": SUITE_CAP_VERSION,
+                            "verb": "observe.predict",
+                            "params": {"target_node": args.market_target_node_id},
+                        },
+                        {
+                            "cap_version": SUITE_CAP_VERSION,
+                            "verb": "graph.neighbors",
+                            "params": {
+                                "node_id": args.market_node_id,
+                                "scope": "parents",
+                                "max_neighbors": 8,
+                            },
+                        },
+                    ],
+                    "stop_on_error": False,
+                },
+            },
+        ),
     ]
-    return direct_cases
+
+    pipeline_cases: list[Case] = []
+    pipeline_embedded_cases = [
+        ("meta.capabilities", {}),
+        ("meta.methods", {"detail": "compact"}),
+        ("observe.predict", {"target_node": args.market_target_node_id}),
+        (
+            "intervene.do",
+            {
+                "treatment_node": args.market_source_node_id,
+                "treatment_value": 1.0,
+                "outcome_node": args.market_target_node_id,
+            },
+        ),
+        ("graph.neighbors", {"node_id": args.market_node_id, "scope": "parents", "max_neighbors": 8}),
+        ("graph.markov_blanket", {"node_id": args.market_node_id, "max_neighbors": 20}),
+        (
+            "graph.paths",
+            {
+                "source_node_id": args.market_source_node_id,
+                "target_node_id": args.market_target_node_id,
+                "max_paths": 5,
+                "max_depth": 8,
+                "directed": True,
+            },
+        ),
+        ("traverse.parents", {"node_id": args.market_node_id, "top_k": 8}),
+        ("traverse.children", {"node_id": args.market_node_id, "top_k": 8}),
+        ("extensions.example.dataset_profile", {}),
+        (
+            "extensions.example.connectivity_report",
+            {
+                "source_node_id": "product_quality",
+                "target_node_id": args.market_target_node_id,
+                "max_paths": 10,
+            },
+        ),
+        (
+            "extensions.example.market_impact",
+            {
+                "target_node": args.market_source_node_id,
+                "intervention_delta": 1.0,
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.path_contribution_report",
+            {
+                "source_node_id": "product_quality",
+                "target_node_id": args.market_target_node_id,
+                "max_paths": 10,
+            },
+        ),
+        (
+            "extensions.example.node_systemic_risk",
+            {
+                "node_id": "product_quality",
+                "stress_delta": 1.0,
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.multi_intervention_impact",
+            {
+                "interventions": [
+                    {
+                        "target_node": args.market_source_node_id,
+                        "intervention_delta": 1.0,
+                    },
+                    {
+                        "target_node": "product_quality",
+                        "intervention_delta": 1.0,
+                    },
+                ],
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.intervention_ranking",
+            {
+                "outcome_node": args.market_target_node_id,
+                "intervention_delta": 1.0,
+                "candidate_nodes": [
+                    args.market_source_node_id,
+                    "product_quality",
+                    "demand",
+                ],
+                "top_k": 3,
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.node_criticality_ranking",
+            {
+                "candidate_nodes": [
+                    args.market_source_node_id,
+                    "product_quality",
+                    "demand",
+                    "retention",
+                ],
+                "stress_delta": 1.0,
+                "top_k": 3,
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.edge_criticality_ranking",
+            {"top_k": 3},
+        ),
+        (
+            "extensions.example.goal_seek_intervention",
+            {
+                "outcome_node": args.market_target_node_id,
+                "target_outcome_change": 3.0,
+                "candidate_nodes": [
+                    args.market_source_node_id,
+                    "product_quality",
+                    "demand",
+                ],
+                "max_plans": 3,
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.budgeted_intervention_optimizer",
+            {
+                "outcome_node": args.market_target_node_id,
+                "budget": 2.0,
+                "objective": "increase",
+                "candidate_nodes": [
+                    args.market_source_node_id,
+                    "product_quality",
+                    "demand",
+                ],
+                "max_allocations": 2,
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.pareto_intervention_frontier",
+            {
+                "outcome_node": args.market_target_node_id,
+                "intervention_delta": 1.0,
+                "objective": "increase",
+                "candidate_nodes": [
+                    args.market_source_node_id,
+                    "product_quality",
+                    "demand",
+                    "retention",
+                ],
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.scenario_compare",
+            {
+                "outcome_node": args.market_target_node_id,
+                "scenarios": [
+                    {
+                        "name": "growth_push",
+                        "interventions": [
+                            {
+                                "target_node": args.market_source_node_id,
+                                "intervention_delta": 1.5,
+                            },
+                            {"target_node": "product_quality", "intervention_delta": 0.5},
+                        ],
+                    },
+                    {
+                        "name": "quality_focus",
+                        "interventions": [
+                            {"target_node": "product_quality", "intervention_delta": 1.5},
+                        ],
+                    },
+                ],
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.shock_cascade_simulation",
+            {
+                "target_node": "product_quality",
+                "shock_delta": 1.0,
+                "steps": 3,
+                "damping": 0.6,
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.resilience_report",
+            {"top_k": 3, "min_effect_threshold": 0.0001},
+        ),
+        (
+            "extensions.example.target_vulnerability_report",
+            {
+                "target_node": args.market_target_node_id,
+                "shock_delta": 1.0,
+                "candidate_sources": [
+                    args.market_source_node_id,
+                    "product_quality",
+                    "demand",
+                    "retention",
+                ],
+                "top_k": 3,
+                "min_effect_threshold": 0.0001,
+            },
+        ),
+        (
+            "extensions.example.bottleneck_report",
+            {"top_k": 3, "max_paths_per_pair": 20},
+        ),
+        (
+            "extensions.example.influence_matrix",
+            {
+                "node_ids": [
+                    "marketing_spend",
+                    "product_quality",
+                    "demand",
+                    "retention",
+                    args.market_target_node_id,
+                ]
+            },
+        ),
+        (
+            "extensions.example.intervention_battle",
+            {
+                "outcome_node": args.market_target_node_id,
+                "plan_a": {
+                    "name": "acquisition_heavy",
+                    "interventions": [
+                        {"target_node": args.market_source_node_id, "intervention_delta": 1.5}
+                    ],
+                },
+                "plan_b": {
+                    "name": "product_heavy",
+                    "interventions": [
+                        {"target_node": "product_quality", "intervention_delta": 1.0}
+                    ],
+                },
+                "min_effect_threshold": 0.0001,
+                "disruption_penalty": 1.0,
+            },
+        ),
+        ("extensions.example.dataset_density", {}),
+        ("extensions.example.verb_catalog", {"detail": "compact", "include_examples": False}),
+    ]
+    for embedded_verb, embedded_params in pipeline_embedded_cases:
+        payload: dict[str, Any] = {
+            "verb": "extensions.market.interpret_request",
+            "params": {
+                "request": {
+                    "cap_version": SUITE_CAP_VERSION,
+                    "verb": embedded_verb,
+                }
+            },
+        }
+        if embedded_params:
+            payload["params"]["request"]["params"] = embedded_params
+        pipeline_cases.append(
+            _case(
+                name=f"pipeline-{embedded_verb.replace('.', '-')}",
+                category="pipeline",
+                top_level_verb="extensions.market.interpret_request",
+                payload=payload,
+            )
+        )
+
+    return direct_cases + pipeline_cases
 
 def _case(
     name: str,

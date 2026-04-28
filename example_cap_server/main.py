@@ -62,7 +62,11 @@ from cap.server import (
 )
 
 from example_cap_server import __version__
+from example_cap_server import market_interpretation
+from example_cap_server import runtime_config
 from example_cap_server import toy_graph
+from example_cap_server.integrations import get_cap_function_plan
+from example_cap_server.market_pipeline.parser import parse_cap_request
 
 
 @dataclass(frozen=True)
@@ -681,6 +685,76 @@ class VerbCatalogRequest(BaseModel):
 
 
 class VerbCatalogResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: dict
+
+
+class MarketInterpretParams(BaseModel):
+    request: dict
+
+
+class MarketInterpretRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.market.interpret_request"
+    params: MarketInterpretParams
+
+
+class MarketInterpretResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: dict
+
+
+class MarketParseParams(BaseModel):
+    request: dict
+
+
+class MarketParseRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.market.parse_request"
+    params: MarketParseParams
+
+
+class MarketParseResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    cap_version: str
+    request_id: str
+    verb: str
+    status: str
+    result: dict
+
+
+class MarketBatchParams(BaseModel):
+    requests: list[dict]
+    stop_on_error: bool = False
+
+
+class MarketBatchRequest(BaseModel):
+    cap_version: str = "0.2.2"
+    request_id: str | None = None
+    context: dict | None = None
+    options: dict = Field(default_factory=dict)
+    verb: str = "extensions.market.batch_execute"
+    params: MarketBatchParams
+
+
+class MarketBatchResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     cap_version: str
@@ -1848,11 +1922,181 @@ def _example_request_for_verb(verb: str) -> dict:
         },
         "extensions.example.dataset_density": {},
         "extensions.example.verb_catalog": {"detail": "compact", "include_examples": True},
+        "extensions.market.parse_request": {
+            "request": {
+                "cap_version": "0.2.2",
+                "verb": "graph.neighbors",
+                "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5},
+            }
+        },
+        "extensions.market.batch_execute": {
+            "requests": [
+                {
+                    "cap_version": "0.2.2",
+                    "verb": "observe.predict",
+                    "params": {"target_node": "revenue"},
+                },
+                {
+                    "cap_version": "0.2.2",
+                    "verb": "graph.neighbors",
+                    "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5},
+                },
+            ]
+        },
+        "extensions.market.interpret_request": {
+            "request": {
+                "cap_version": "0.2.2",
+                "verb": "graph.neighbors",
+                "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5},
+            }
+        },
     }
     params = params_by_verb.get(verb)
     if params is not None:
         base["params"] = params
     return base
+
+
+@registry.extension(
+    namespace="market",
+    name="parse_request",
+    request_model=MarketParseRequest,
+    response_model=MarketParseResponse,
+    description=(
+        "Parse an embedded CAP request and return extracted nodes plus mapped "
+        "graph-computer function plan."
+    ),
+)
+def market_parse_request(payload: MarketParseRequest, request: Request) -> dict:
+    del request
+    effective_options = runtime_config.merge_market_options(payload.options)
+    try:
+        parsed = parse_cap_request(payload.params.request)
+        result = {
+            "parsed_request": {
+                "verb": parsed.verb,
+                "node_ids": parsed.node_ids,
+                "params": parsed.params,
+            },
+            "function_plan": get_cap_function_plan(parsed.verb),
+            "effective_options": effective_options,
+        }
+        status = "success"
+    except ValueError as error:
+        result = {
+            "parse_error": str(error),
+            "effective_options": effective_options,
+        }
+        status = "invalid_request"
+
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "market-parse-request",
+        "verb": payload.verb,
+        "status": status,
+        "result": result,
+    }
+
+
+@registry.extension(
+    namespace="market",
+    name="batch_execute",
+    request_model=MarketBatchRequest,
+    response_model=MarketBatchResponse,
+    description=(
+        "Execute multiple embedded CAP requests through the market pipeline and "
+        "return per-request stage outcomes."
+    ),
+)
+async def market_batch_execute(payload: MarketBatchRequest, request: Request) -> dict:
+    del request
+    effective_options = runtime_config.merge_market_options(payload.options)
+    items: list[dict] = []
+    success_count = 0
+
+    for index, embedded in enumerate(payload.params.requests):
+        run_result = await market_interpretation.interpret_cap_request(
+            embedded,
+            options=effective_options,
+        )
+        stages = run_result.get("stages", {}) if isinstance(run_result, dict) else {}
+        stage_statuses = {
+            stage_name: stage_payload.get("status", "unknown")
+            for stage_name, stage_payload in stages.items()
+            if isinstance(stage_payload, dict)
+        }
+        stage_ok = (
+            stage_statuses.get("parse") == "success"
+            and stage_statuses.get("graph_operations") == "success"
+            and stage_statuses.get("calculation") == "success"
+            and stage_statuses.get("postprocess") == "success"
+            and stage_statuses.get("analysis") == "success"
+        )
+        if stage_ok:
+            success_count += 1
+        items.append(
+            {
+                "index": index,
+                "request": embedded,
+                "stage_statuses": stage_statuses,
+                "ok": stage_ok,
+                "result": run_result,
+            }
+        )
+        if payload.params.stop_on_error and not stage_ok:
+            break
+
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "market-batch-execute",
+        "verb": payload.verb,
+        "status": "success",
+        "result": {
+            "total_requests": len(payload.params.requests),
+            "executed_requests": len(items),
+            "success_count": success_count,
+            "failure_count": len(items) - success_count,
+            "stopped_early": (
+                payload.params.stop_on_error and len(items) < len(payload.params.requests)
+            ),
+            "items": items,
+        },
+    }
+
+
+@registry.extension(
+    namespace="market",
+    name="interpret_request",
+    request_model=MarketInterpretRequest,
+    response_model=MarketInterpretResponse,
+    description=(
+        "Parse an embedded CAP request and return staged graph/calc/postprocess/analysis "
+        "results for market nodes."
+    ),
+)
+async def market_interpret_request(payload: MarketInterpretRequest, request: Request) -> dict:
+    del request
+    effective_options = runtime_config.merge_market_options(payload.options)
+    result = await market_interpretation.interpret_cap_request(
+        payload.params.request,
+        options=effective_options,
+    )
+    debug_cfg = (
+        effective_options.get("debug", {})
+        if isinstance(effective_options, dict)
+        else {}
+    )
+    if isinstance(result, dict) and isinstance(debug_cfg, dict):
+        if bool(debug_cfg.get("include_runtime_config", False)):
+            result["runtime_config"] = runtime_config.runtime_config_debug_view()
+
+    return {
+        "cap_version": payload.cap_version,
+        "request_id": payload.request_id or "market-interpret-request",
+        "verb": payload.verb,
+        "status": "success",
+        "result": result,
+    }
 
 
 async def provenance_context_provider(
@@ -1898,6 +2142,11 @@ def health() -> dict:
         "app_name": "cap-example",
         "version": __version__,
     }
+
+
+@app.get("/debug/runtime-config")
+def debug_runtime_config() -> dict:
+    return runtime_config.runtime_config_debug_view()
 
 
 @app.get("/.well-known/cap.json")

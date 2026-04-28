@@ -929,6 +929,9 @@ def _verb_description(verb: str) -> str:
             "Synthetic dataset graph statistics including density, sparsity, and degree summaries."
         ),
         "extensions.example.verb_catalog": "Usage-oriented catalog with method descriptors and examples.",
+        "extensions.market.parse_request": "Parse embedded CAP request and return mapped function plan.",
+        "extensions.market.batch_execute": "Execute multiple embedded CAP requests via staged market pipeline.",
+        "extensions.market.interpret_request": "Staged parse/graph/calc/postprocess/analysis for one embedded CAP request.",
     }
     return descriptions.get(verb, "Verb descriptor not documented in this demo.")
 

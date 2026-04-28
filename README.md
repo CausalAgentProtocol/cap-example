@@ -16,6 +16,7 @@ It focuses on CAP verb usage and extension design.
 - one `POST /cap` endpoint for all verbs
 - CAP core + convenience verbs
 - multiple namespaced extension verbs
+- staged extension pipeline (`parse -> graph_operations -> calculation -> postprocess -> analysis`)
 
 ## Run Locally
 
@@ -37,9 +38,24 @@ Inspect:
 - `http://127.0.0.1:8000/docs`
 - `http://127.0.0.1:8000/health`
 
+## Runtime Config
+
+Optional config file:
+
+```bash
+cp config/cap-example.example.toml config/cap-example.toml
+export CAP_EXAMPLE_CONFIG_FILE="/absolute/path/to/cap-example/config/cap-example.toml"
+```
+
+Debug loaded config:
+
+```bash
+curl -s http://127.0.0.1:8000/debug/runtime-config | jq
+```
+
 ## Full Verb Suite
 
-Run all direct examples:
+Run all direct + pipeline examples:
 
 ```bash
 python scripts/run_cap_verb_suite.py --base-url http://127.0.0.1:8000
@@ -189,6 +205,50 @@ curl -s -X POST http://127.0.0.1:8000/cap -H 'Content-Type: application/json' -d
 }' | jq
 ```
 
+```bash
+curl -s -X POST http://127.0.0.1:8000/cap -H 'Content-Type: application/json' -d '{
+  "cap_version": "0.2.2",
+  "request_id": "req-parse",
+  "verb": "extensions.market.parse_request",
+  "params": {
+    "request": {
+      "cap_version": "0.2.2",
+      "verb": "graph.neighbors",
+      "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5}
+    }
+  }
+}' | jq
+```
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/cap -H 'Content-Type: application/json' -d '{
+  "cap_version": "0.2.2",
+  "request_id": "req-batch",
+  "verb": "extensions.market.batch_execute",
+  "params": {
+    "requests": [
+      {"cap_version": "0.2.2", "verb": "observe.predict", "params": {"target_node": "revenue"}},
+      {"cap_version": "0.2.2", "verb": "graph.neighbors", "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5}}
+    ]
+  }
+}' | jq
+```
+
+```bash
+curl -s -X POST http://127.0.0.1:8000/cap -H 'Content-Type: application/json' -d '{
+  "cap_version": "0.2.2",
+  "request_id": "req-interpret",
+  "verb": "extensions.market.interpret_request",
+  "params": {
+    "request": {
+      "cap_version": "0.2.2",
+      "verb": "graph.neighbors",
+      "params": {"node_id": "demand", "scope": "parents", "max_neighbors": 5}
+    }
+  }
+}' | jq
+```
+
 ## Verb Coverage Table
 
 | Verb | Type | Required params |
@@ -223,6 +283,9 @@ curl -s -X POST http://127.0.0.1:8000/cap -H 'Content-Type: application/json' -d
 | `extensions.example.intervention_battle` | extension | `outcome_node`, `plan_a`, `plan_b`, optional `min_effect_threshold`, optional `disruption_penalty` |
 | `extensions.example.dataset_density` | extension | none |
 | `extensions.example.verb_catalog` | extension | optional `detail`, `include_examples` |
+| `extensions.market.parse_request` | extension | `params.request` |
+| `extensions.market.batch_execute` | extension | `params.requests[]` |
+| `extensions.market.interpret_request` | extension | `params.request` |
 
 ## Testing
 
